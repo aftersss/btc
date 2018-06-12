@@ -24,7 +24,7 @@ public class Launcher {
         String[] symbols = symbolStr.split("\\s+");
         for (String symbol : symbols) {
             String symbolReal = symbol.replace("-", "");
-            OrderList orderList = new OrderList(symbol, Integer.parseInt(ConfigHandler.getConf("btc." + symbol + ".oredersize", "10")));
+            OrderList orderList = new OrderList(symbol, Integer.parseInt(ConfigHandler.getConf("btc." + symbol + ".oredrsize", "10")));
             Map<String, Pair> map = mapMap.get(symbolReal);
             if (map != null) {
                 orderList.setOrders(map);
