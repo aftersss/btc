@@ -12,8 +12,6 @@ public class AccountSyncThread extends Thread {
     private static final Logger logger = LoggerFactory.getLogger(AccountSyncThread.class);
     private static final long sleepTimes = 5 * 60 * 1000;
     private static final Map<String, Double> availableMap = new HashMap<>();
-    private static final Map<String, Double> frozenMap = new HashMap<>();
-    private static final Map<String, Double> balanceMap = new HashMap<>();
 
     public AccountSyncThread() {
         setName("account-sync-thread");
@@ -29,11 +27,7 @@ public class AccountSyncThread extends Thread {
                     for (Map<String, String> m : mapList) {
                         String currency = m.get("currency");
                         double available = Double.parseDouble(m.get("available"));
-                        double frozen = Double.parseDouble(m.get("frozen"));
-                        double balance = Double.parseDouble(m.get("balance"));
-                        availableMap.put(currency, available);
-                        frozenMap.put(currency, frozen);
-                        balanceMap.put(currency, balance);
+                        updateAvailable(currency, available);
                     }
                 }
                 Thread.sleep(sleepTimes);
@@ -43,16 +37,8 @@ public class AccountSyncThread extends Thread {
         }
     }
 
-    public static double getAvailable(String currency) {
-        return availableMap.get(currency);
-    }
-
-    public static double getFrozen(String currency) {
-        return frozenMap.get(currency);
-    }
-
-    public static double getBalance(String currency) {
-        return balanceMap.get(currency);
+    public synchronized static void updateAvailable(String currency, double available) {
+        availableMap.put(currency, available);
     }
 
     public static double getNum(String currency, double num, double price) {
@@ -66,5 +52,9 @@ public class AccountSyncThread extends Thread {
         } else {
             return 0.0;
         }
+    }
+
+    public synchronized static void deleteAvailable(String currency, double num, double price) {
+        availableMap.put(currency, availableMap.get(currency) - num * price);
     }
 }
