@@ -23,8 +23,9 @@ public class Launcher {
         String symbolStr = ConfigHandler.getConf("btc.symbol");
         String[] symbols = symbolStr.split("\\s+");
         for (String symbol : symbols) {
+            String symbolReal = symbol.replace("-", "");
             OrderList orderList = new OrderList(symbol, Integer.parseInt(ConfigHandler.getConf("btc." + symbol + ".oredersize", "10")));
-            Map<String, Pair> map = mapMap.get(symbol);
+            Map<String, Pair> map = mapMap.get(symbolReal);
             if (map != null) {
                 orderList.setOrders(map);
             }

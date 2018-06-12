@@ -58,6 +58,7 @@ public class PlaceOrderThread extends Thread {
                     if (flag) {
                         num = Math.min(num, this.num);
                         num = AccountCache.getNum(currency, num, price);
+                        num = Math.round(num * 10000 - 0.5) / 10000D;
                         String id = (String) fcoinApi.orders(symbol, "buy", "limit", price + "", num + "");
                         if (StringUtils.isNotBlank(id)) {
                             buy = new Order(id, symbol, price, num);
@@ -69,7 +70,8 @@ public class PlaceOrderThread extends Thread {
                     }
                     if (flag) {
                         int count = 0;
-                        while (true) {
+                        boolean f = true;
+                        while (f) {
                             try {
                                 double nn = AccountCache.getNum(this.coin, num, 1d);
                                 if (nn == num) {
@@ -77,6 +79,7 @@ public class PlaceOrderThread extends Thread {
                                     newPrice = Math.round(newPrice * 100 + 0.5) / 100D;
                                     String id1 = (String) fcoinApi.orders(symbol, "sell", "limit", newPrice + "", num + "");
                                     if (StringUtils.isNotBlank(id1)) {
+                                        f = false;
                                         Order sell = new Order(id1, symbol, newPrice, num);
                                         orderList.addSellOrder(buy.getId(), sell);
                                         break;

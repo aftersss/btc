@@ -30,7 +30,7 @@ public class Writer extends Thread {
 
     @Override
     public void run() {
-        while (ShutdownHook.isShutDown()) {
+        while (!ShutdownHook.isShutDown()) {
             save();
             try {
                 Thread.sleep(500L);
@@ -55,11 +55,22 @@ public class Writer extends Thread {
                 }
                 calendar.add(Calendar.DAY_OF_MONTH, 1);
                 limitTime = MyDateFormat.format("yyyyMMdd", calendar.getTime());
-                orderWriter = new FileWriter(new File(CommonUntil.dataDir, "order-" + time + ".dat"), true);
-                finishWriter = new FileWriter(new File(CommonUntil.dataDir, "finish-" + time + ".dat"), true);
+                if(!CommonUntil.dataDir.exists()){
+                    CommonUntil.dataDir.mkdirs();
+                }
+                File orderFile = new File(CommonUntil.dataDir, "order-" + time + ".dat");
+                File finsihFile = new File(CommonUntil.dataDir, "finish-" + time + ".dat");
+                if (!orderFile.exists()){
+                    orderFile.createNewFile();
+                }
+                if (!finsihFile.exists()){
+                    finsihFile.createNewFile();
+                }
+                orderWriter = new FileWriter(orderFile, true);
+                finishWriter = new FileWriter(finsihFile, true);
             }
             while (!orderQueue.isEmpty()) {
-                String t = MyDateFormat.format("yyyy-MM-dd HH:mm:ss", new Date());
+                String t = MyDateFormat.format("yyyyMMddHHmmss", new Date());
                 Pair pair = orderQueue.poll();
                 assert pair != null;
                 orderWriter.write(t + " " + pair.getBuy().getSymbol() + " " + pair.getBuy().getNum() +
@@ -68,7 +79,7 @@ public class Writer extends Thread {
             }
             orderWriter.flush();
             while (!finishQueue.isEmpty()) {
-                String t = MyDateFormat.format("yyyy-MM-dd HH:mm:ss", new Date());
+                String t = MyDateFormat.format("yyyyMMddHHmmss", new Date());
                 Pair pair = finishQueue.poll();
                 assert pair != null;
                 finishWriter.write(t + " " + pair.getBuy().getSymbol() + " " + pair.getBuy().getNum() +

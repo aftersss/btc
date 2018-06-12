@@ -21,7 +21,9 @@ public class OrderList {
     }
 
     public Map<String, Pair> getOrders() {
-        return Collections.unmodifiableMap(orders);
+        Map<String, Pair> map = new HashMap<>();
+        map.putAll(orders);
+        return map;
     }
 
     public void addBuyOrder(Order buy) {

@@ -30,7 +30,7 @@ public class CheckOrderThread extends Thread {
             try {
                 Map<String, Pair> orders = orderList.getOrders();
                 if (orders != null && orders.size() > 0) {
-                    List<Map<String, String>> mapList = (List<Map<String, String>>) fcoinApi.queryOrderList(symbol, "submitted", "1", "0", limit);
+                    List<Map<String, String>> mapList = (List<Map<String, String>>) fcoinApi.queryOrderList(symbol, "submitted", "1", null, limit);
                     if (mapList != null) {
                         for (Map<String, String> map : mapList) {
                             String id = map.get("id");
@@ -41,7 +41,7 @@ public class CheckOrderThread extends Thread {
                         }
                     }
                     if (orders.size() > 0) {
-                        List<Map<String, String>> mapList1 = (List<Map<String, String>>) fcoinApi.queryOrderList(symbol, "partial_filled", "1", "0", limit);
+                        List<Map<String, String>> mapList1 = (List<Map<String, String>>) fcoinApi.queryOrderList(symbol, "partial_filled", "1", null, limit);
                         if (mapList1 != null) {
                             for (Map<String, String> map : mapList1) {
                                 String id = map.get("id");
