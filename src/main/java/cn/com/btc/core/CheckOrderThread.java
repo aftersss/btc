@@ -36,7 +36,7 @@ public class CheckOrderThread extends Thread {
                         if (result != null) {
                             String state = (String) result.get("state");
                             if ("filled".equalsIgnoreCase(state)) {
-                                orderList.removeOrder(order.getId());
+                                orderList.removeOrder(order);
                             }
                         }
                         Thread.sleep(sleepTime);
@@ -48,7 +48,7 @@ public class CheckOrderThread extends Thread {
                     if (result != null) {
                         String state = (String) result.get("state");
                         if ("filled".equalsIgnoreCase(state)) {
-                            orderList.removeOrder(order.getId());
+                            orderList.removeOrder(order);
                         }
                     }
                 }
