@@ -88,6 +88,7 @@ public class FcoinApi {
         Map map = gson.fromJson(json, Map.class);
         int status = ((Number) map.get("status")).intValue();
         if (status == 0) {
+            logger.info("accounts: " + json);
             return map.get("data");
         } else {
             logger.error("accountsBalance error!!!" + json);
