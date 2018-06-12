@@ -21,7 +21,6 @@ public class PlaceOrderThread extends Thread {
     private final String coin;
     private final long sleepTime;
     private FcoinApi fcoinApi = FcoinApiHandler.getInstance();
-    private DecimalFormat df = new DecimalFormat("#.00");
 
     public PlaceOrderThread(String symbol, OrderList orderList) {
         this.symbol = symbol.replace("-", "");
