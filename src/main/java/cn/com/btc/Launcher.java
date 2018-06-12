@@ -3,15 +3,12 @@ package cn.com.btc;
 import cn.com.btc.core.*;
 import cn.com.btc.utils.CommonUntil;
 import org.apache.log4j.PropertyConfigurator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Launcher {
-    private static final Logger logger = LoggerFactory.getLogger(Launcher.class);
     private static final AccountSyncThread accountSyncThread = new AccountSyncThread();
     private static final Map<String, Thread> placeOrderMap = new HashMap<>();
     private static final Map<String, Thread> checkOrderMap = new HashMap<>();
