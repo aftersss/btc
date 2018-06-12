@@ -19,7 +19,7 @@ public class Launcher {
         String symbolStr = ConfigHandler.getConf("btc.symbol");
         String[] symbols = symbolStr.split("\\s+");
         for (String symbol : symbols) {
-            OrderList orderList = new OrderList(symbol, Integer.parseInt(ConfigHandler.getConf("btc." + symbol + ".oredersize", "10")));
+            OrderList orderList = new OrderList(symbol, Integer.parseInt(ConfigHandler.getConf("btc." + symbol + ".ordersize", "10")));
             PlaceOrderThread placeOrderThread = new PlaceOrderThread(symbol, orderList);
             placeOrderMap.put(symbol, placeOrderThread);
             placeOrderThread.start();
