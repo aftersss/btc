@@ -80,6 +80,7 @@ public class PlaceOrderThread extends Thread {
                                     subNum = filled_amount_str - fill_fees;
                                     break;
                                 }
+                                Thread.sleep(200L);
                                 Map<String, Object> map1 = (Map<String, Object>) fcoinApi.marketDepth(level, symbol);
                                 List<Number> asks1 = (List<Number>) map1.get("asks");
                                 int index = Math.min(8, asks1.size());
