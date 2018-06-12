@@ -72,6 +72,8 @@ public class PlaceOrderThread extends Thread {
                             num += asks.get(1).doubleValue() * discount;
                             flag = orderList.isAvail(price);
                         }
+                    } else {
+                        
                     }
                     Order buy = null;
                     if (flag) {
