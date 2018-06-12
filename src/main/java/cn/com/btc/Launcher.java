@@ -16,6 +16,7 @@ public class Launcher {
     private static final Map<String, Thread> checkOrderMap = new HashMap<>();
 
     public static void main(String[] args) throws IOException {
+        Runtime.getRuntime().addShutdownHook(new ShutdownHook());
         Map<String, Map<String, Pair>> mapMap = Writer.load();
         PropertyConfigurator.configure(new File(CommonUntil.confDir, "log4j.properties").getAbsolutePath());
         accountSyncThread.start();

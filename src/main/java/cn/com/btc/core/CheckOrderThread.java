@@ -31,6 +31,9 @@ public class CheckOrderThread extends Thread {
             try {
                 Map<String, Pair> orders = orderList.getOrders();
                 for (Pair pair : orders.values()) {
+                    if (pair.getSell() == null) {
+                        continue;
+                    }
                     Map<String, String> buyMap = (Map<String, String>) fcoinApi.getOrder(pair.getBuy().getId());
                     Map<String, String> sellMap = (Map<String, String>) fcoinApi.getOrder(pair.getSell().getId());
                     if ("filled".equalsIgnoreCase(buyMap.get("state")) && "filled".equalsIgnoreCase(sellMap.get("state"))) {
