@@ -1,4 +1,4 @@
-package com.slp.btc;
+package cn.com.btc.config;
 
 public enum UrlConfig {
     //查询服务器时间
@@ -11,7 +11,7 @@ public enum UrlConfig {
     SYMBOLS("https://api.fcoin.com/v2/public/symbols", "GET"),
 
     //获取 ticker 数据，使用时需要用具体交易对名称替换$symbol
-    TICKER("https://api.fcoin.com/v2/market/ticker/$symbol", "GET"),
+    MARKET_TICKER("https://api.fcoin.com/v2/market/ticker/$symbol", "GET"),
 
     //获取最新的深度明细
     //使用时需要用具体交易对名称替换$symbol，具体查看的种类替换$level
@@ -37,7 +37,7 @@ public enum UrlConfig {
     ORDER_SUBMIT_CANCEL("https://api.fcoin.com/v2/orders/{order_id}/submit-cancel", "POST"),
 
     //查询指定订单的成交记录
-    ORDER_STATUS("https://api.fcoin.com/v2/orders/{order_id}/match-results", "GET")
+    ORDER_MATCH_RESULTS("https://api.fcoin.com/v2/orders/{order_id}/match-results", "GET")
 
 
     ;

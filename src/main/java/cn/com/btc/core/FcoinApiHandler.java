@@ -1,6 +1,6 @@
-package com.slp.btc.core;
+package cn.com.btc.core;
 
-import com.slp.btc.fcoin.FcoinApi;
+import cn.com.btc.ft.FcoinApi;
 
 public class FcoinApiHandler {
     private static FcoinApi fcoinApi = null;

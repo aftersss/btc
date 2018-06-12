@@ -1,0 +1,17 @@
+{
+	"status": 0,
+	"data": {
+		"id": "4T8iAKyN25R47oDskXPxe5YVY11qoxfiPPZGim5yMEQ=",
+		"symbol": "fteth",
+		"amount": "25818.560000000000000000",
+		"price": "0.000000000000000000",
+		"created_at": 1528646400207,
+		"type": "market",
+		"side": "sell",
+		"filled_amount": "25818.560000000000000000",
+		"executed_value": "27.330778478700000000",
+		"fill_fees": "0.027330778478700000",
+		"source": "web",
+		"state": "filled"
+	}
+}

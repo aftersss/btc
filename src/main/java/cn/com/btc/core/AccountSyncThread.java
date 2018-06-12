@@ -1,7 +1,6 @@
-package com.slp.btc.core;
+package cn.com.btc.core;
 
-import com.google.gson.Gson;
-import com.slp.btc.fcoin.FcoinApi;
+import cn.com.btc.ft.FcoinApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +24,7 @@ public class AccountSyncThread extends Thread {
         FcoinApi fcoinApi = FcoinApiHandler.getInstance();
         while (true) {
             try {
-                List<Map<String, String>> mapList = fcoinApi.accountsBalance();
+                List<Map<String, String>> mapList = (List<Map<String, String>>) fcoinApi.accountsBalance();
                 if (mapList != null) {
                     for (Map<String, String> m : mapList) {
                         String currency = m.get("currency");
@@ -54,5 +53,18 @@ public class AccountSyncThread extends Thread {
 
     public static double getBalance(String currency) {
         return balanceMap.get(currency);
+    }
+
+    public static double getNum(String currency, double num, double price) {
+        Double hasNum = availableMap.get(currency);
+        if (hasNum != null) {
+            if (hasNum > num * price) {
+                return num;
+            } else {
+                return hasNum / price * 0.99;
+            }
+        } else {
+            return 0.0;
+        }
     }
 }

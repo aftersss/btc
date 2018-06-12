@@ -1,7 +1,7 @@
-package com.slp.btc;
+package cn.com.btc;
 
-import com.slp.btc.core.*;
-import com.slp.btc.util.CommonUntil;
+import cn.com.btc.core.*;
+import cn.com.btc.utils.CommonUntil;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,15 +19,15 @@ public class Launcher {
     public static void main(String[] args) {
         PropertyConfigurator.configure(new File(CommonUntil.confDir, "log4j.properties").getAbsolutePath());
         accountSyncThread.start();
-        String typeStr = ConfigHandler.getConf("btc.type");
-        String[] types = typeStr.split("\\s+");
-        for (String type : types) {
-            OrderList orderList = new OrderList(Integer.parseInt(ConfigHandler.getConf("btc." + type + ".oredersize", "10")));
-            PlaceOrderThread placeOrderThread = new PlaceOrderThread(type, orderList);
-            placeOrderMap.put(type, placeOrderThread);
+        String symbolStr = ConfigHandler.getConf("btc.symbol");
+        String[] symbols = symbolStr.split("\\s+");
+        for (String symbol : symbols) {
+            OrderList orderList = new OrderList(symbol, Integer.parseInt(ConfigHandler.getConf("btc." + symbol + ".oredersize", "10")));
+            PlaceOrderThread placeOrderThread = new PlaceOrderThread(symbol, orderList);
+            placeOrderMap.put(symbol, placeOrderThread);
             placeOrderThread.start();
-            CheckOrderThread checkOrderThread = new CheckOrderThread(type, orderList);
-            checkOrderMap.put(type, checkOrderThread);
+            CheckOrderThread checkOrderThread = new CheckOrderThread(symbol, orderList);
+            checkOrderMap.put(symbol, checkOrderThread);
             checkOrderThread.start();
         }
     }
