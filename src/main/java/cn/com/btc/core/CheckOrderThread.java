@@ -39,7 +39,7 @@ public class CheckOrderThread extends Thread {
                     }
                     Thread.sleep(sleepTime * 8);
                 }
-                Thread.sleep(sleepTime * 30);
+                Thread.sleep(sleepTime * 10);
             } catch (Throwable t) {
                 logger.error("check order error!!!", t);
             }
