@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ public class PlaceOrderThread extends Thread {
     private final String coin;
     private final long sleepTime;
     private FcoinApi fcoinApi = FcoinApiHandler.getInstance();
+    private DecimalFormat df = new DecimalFormat("#.00");
 
     public PlaceOrderThread(String symbol, OrderList orderList) {
         this.symbol = symbol.replace("-", "");
@@ -36,7 +38,7 @@ public class PlaceOrderThread extends Thread {
 
     @Override
     public void run() {
-        while (ShutdownHook.isShutDown()) {
+        while (!ShutdownHook.isShutDown()) {
             try {
                 if (!orderList.isSaturated()) {
                     boolean flag = false;
@@ -45,11 +47,11 @@ public class PlaceOrderThread extends Thread {
                     Map<String, Object> map = (Map<String, Object>) fcoinApi.marketDepth(level, symbol);
                     long ts = ((Number) map.get("ts")).longValue();
                     long now = MyDateFormat.getLongTime();
-                    if (ts < now && now - ts < 1000) {
+                    if (Math.abs(now - ts) < 1000) {
                         List<Number> asks = (List<Number>) map.get("asks");
                         if (asks.size() > 0) {
                             price = asks.get(0).doubleValue();
-                            num += asks.get(0).doubleValue();
+                            num += asks.get(1).doubleValue();
                             flag = orderList.isAvail(price);
                         }
                     }
@@ -72,9 +74,11 @@ public class PlaceOrderThread extends Thread {
                             try {
                                 double nn = AccountCache.getNum(this.coin, num, 1d);
                                 if (nn == num) {
-                                    String id1 = (String) fcoinApi.orders(symbol, "sell", "limit", (price * profit) + "", num + "");
+                                    double newPrice = price * profit;
+                                    newPrice = Math.round(newPrice * 100 + 0.5) / 100D;
+                                    String id1 = (String) fcoinApi.orders(symbol, "sell", "limit", newPrice + "", num + "");
                                     if (StringUtils.isNotBlank(id1)) {
-                                        Order sell = new Order(id1, symbol, price * profit, num);
+                                        Order sell = new Order(id1, symbol, newPrice, num);
                                         orderList.addSellOrder(buy.getId(), sell);
                                         break;
                                     }
