@@ -61,9 +61,14 @@ public class PlaceOrderThread extends Thread {
                         double n = Math.min(num, this.num);
                         n = AccountSyncThread.getNum(currency, n, price);
                         id = (String) fcoinApi.orders(symbol, "buy", "limit", price + "", n + "");
+                        if (StringUtils.isNotBlank(id)) {
+                            AccountSyncThread.deleteAvailable(currency, n, price);
+                        } else {
+                            flag = false;
+                        }
                     }
                     double subNum = 0d;
-                    if (StringUtils.isNotBlank(id)) {
+                    if (flag) {
                         while (true) {
                             Thread.sleep(200L);
                             Map<String, Object> result = (Map<String, Object>) fcoinApi.getOrder(id);
