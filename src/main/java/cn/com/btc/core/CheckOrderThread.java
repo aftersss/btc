@@ -4,6 +4,7 @@ import cn.com.btc.ft.FcoinApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,33 +30,41 @@ public class CheckOrderThread extends Thread {
         while (!ShutdownHook.isShutDown()) {
             try {
                 Map<String, Pair> orders = orderList.getOrders();
+                List<String> sellIdList = new ArrayList<>();
+                List<String> buyIdList = new ArrayList<>();
                 if (orders != null && orders.size() > 0) {
-                    List<Map<String, String>> mapList = (List<Map<String, String>>) fcoinApi.queryOrderList(symbol, "submitted", "1", null, limit);
+                    List<Map<String, String>> mapList = (List<Map<String, String>>) fcoinApi.queryOrderList(symbol, "submitted", "10", null, limit);
                     if (mapList != null) {
                         for (Map<String, String> map : mapList) {
                             String id = map.get("id");
-                            Pair pair = orders.get(id);
-                            if (pair != null) {
-                                orders.remove(id);
+                            String type = map.get("side");
+                            if ("buy".equalsIgnoreCase(type)) {
+                                buyIdList.add(id);
+                            } else {
+                                sellIdList.add(id);
                             }
                         }
                     }
                     if (orders.size() > 0) {
-                        List<Map<String, String>> mapList1 = (List<Map<String, String>>) fcoinApi.queryOrderList(symbol, "partial_filled", "1", null, limit);
+                        List<Map<String, String>> mapList1 = (List<Map<String, String>>) fcoinApi.queryOrderList(symbol, "partial_filled", "10", null, limit);
                         if (mapList1 != null) {
                             for (Map<String, String> map : mapList1) {
                                 String id = map.get("id");
-                                Pair pair = orders.get(id);
-                                if (pair != null) {
-                                    orders.remove(id);
+                                String type = map.get("side");
+                                if ("buy".equalsIgnoreCase(type)) {
+                                    buyIdList.add(id);
+                                } else {
+                                    sellIdList.add(id);
                                 }
                             }
                         }
                     }
                     if (orders.size() > 0) {
                         for (Pair pair : orders.values()) {
-                            orderList.removeOrder(pair.getBuy().getId());
-                            Writer.addFinish(pair);
+                            if (!buyIdList.contains(pair.getBuy().getId()) && !sellIdList.contains(pair.getSell().getId())) {
+                                orderList.removeOrder(pair.getBuy().getId());
+                                Writer.addFinish(pair);
+                            }
                         }
                     }
                 }
