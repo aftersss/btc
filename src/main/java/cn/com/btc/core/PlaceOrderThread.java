@@ -61,7 +61,7 @@ public class PlaceOrderThread extends Thread {
                         List<Number> asks = (List<Number>) map.get("asks");
                         if (asks.size() > 0) {
                             price = asks.get(0).doubleValue();
-                            num += asks.get(1).doubleValue();
+                            num += asks.get(1).doubleValue() * 0.5;
                             flag = orderList.isAvail(price);
                         }
                     }
