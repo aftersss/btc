@@ -30,43 +30,14 @@ public class CheckOrderThread extends Thread {
         while (!ShutdownHook.isShutDown()) {
             try {
                 Map<String, Pair> orders = orderList.getOrders();
-                List<String> sellIdList = new ArrayList<>();
-                List<String> buyIdList = new ArrayList<>();
-                if (orders != null && orders.size() > 0) {
-                    List<Map<String, String>> mapList = (List<Map<String, String>>) fcoinApi.queryOrderList(symbol, "submitted", "10", null, limit);
-                    if (mapList != null) {
-                        for (Map<String, String> map : mapList) {
-                            String id = map.get("id");
-                            String type = map.get("side");
-                            if ("buy".equalsIgnoreCase(type)) {
-                                buyIdList.add(id);
-                            } else {
-                                sellIdList.add(id);
-                            }
-                        }
+                for (Pair pair : orders.values()) {
+                    Map<String, String> buyMap = (Map<String, String>) fcoinApi.getOrder(pair.getBuy().getId());
+                    Map<String, String> sellMap = (Map<String, String>) fcoinApi.getOrder(pair.getSell().getId());
+                    if ("filled".equalsIgnoreCase(buyMap.get("state")) && "filled".equalsIgnoreCase(sellMap.get("state"))) {
+                        orderList.removeOrder(pair.getBuy().getId());
+                        Writer.addFinish(pair);
                     }
-                    if (orders.size() > 0) {
-                        List<Map<String, String>> mapList1 = (List<Map<String, String>>) fcoinApi.queryOrderList(symbol, "partial_filled", "10", null, limit);
-                        if (mapList1 != null) {
-                            for (Map<String, String> map : mapList1) {
-                                String id = map.get("id");
-                                String type = map.get("side");
-                                if ("buy".equalsIgnoreCase(type)) {
-                                    buyIdList.add(id);
-                                } else {
-                                    sellIdList.add(id);
-                                }
-                            }
-                        }
-                    }
-                    if (orders.size() > 0) {
-                        for (Pair pair : orders.values()) {
-                            if (!buyIdList.contains(pair.getBuy().getId()) && !sellIdList.contains(pair.getSell().getId())) {
-                                orderList.removeOrder(pair.getBuy().getId());
-                                Writer.addFinish(pair);
-                            }
-                        }
-                    }
+                    Thread.sleep(sleepTime * 8);
                 }
                 Thread.sleep(sleepTime * 30);
             } catch (Throwable t) {
