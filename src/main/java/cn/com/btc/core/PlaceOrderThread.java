@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.DecimalFormat;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ public class PlaceOrderThread extends Thread {
     private final String currency;
     private final String coin;
     private final long sleepTime;
+    private final boolean isFt;
     private FcoinApi fcoinApi = FcoinApiHandler.getInstance();
 
     public PlaceOrderThread(String symbol, OrderList orderList) {
@@ -28,6 +30,7 @@ public class PlaceOrderThread extends Thread {
         this.coin = s[0];
         this.currency = s[1];
         this.orderList = orderList;
+        this.isFt = "ft".equalsIgnoreCase(currency) || "ft".equalsIgnoreCase(coin);
         this.level = ConfigHandler.getConf("btc." + symbol + ".level", "L20");
         this.num = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".num", "1"));
         this.profit = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".profit", "0.001")) + 1;
@@ -40,6 +43,14 @@ public class PlaceOrderThread extends Thread {
         while (!ShutdownHook.isShutDown()) {
             try {
                 if (!orderList.isSaturated()) {
+                    if (isFt) {
+                        Calendar calendar = Calendar.getInstance();
+                        int min = calendar.get(Calendar.MINUTE);
+                        if (min == 59 || (min >= 0 && min <= 3)) {
+                            Thread.sleep(4 * sleepTime);
+                            continue;
+                        }
+                    }
                     boolean flag = false;
                     double price = 0d;
                     double num = 0d;
