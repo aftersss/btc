@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.DecimalFormat;
+import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
@@ -23,10 +23,12 @@ public class PlaceOrderThread extends Thread {
     private final long sleepTime;
     private final boolean isFt;
     private final double discount;
+    private final Decimal decimal;
     private FcoinApi fcoinApi = FcoinApiHandler.getInstance();
 
-    public PlaceOrderThread(String symbol, OrderList orderList) {
+    public PlaceOrderThread(String symbol, OrderList orderList, Decimal decimal) {
         this.symbol = symbol.replace("-", "");
+        this.decimal = decimal;
         String[] s = symbol.split("-");
         this.coin = s[0];
         this.currency = s[1];
@@ -42,6 +44,10 @@ public class PlaceOrderThread extends Thread {
 
     @Override
     public void run() {
+        if (decimal == null || decimal.getAmount_decimal() <= 0 || decimal.getPrice_decimal() <= 0) {
+            logger.error("get decimal is error!!! " + decimal);
+            return;
+        }
         while (!ShutdownHook.isShutDown()) {
             try {
                 if (!orderList.isSaturated()) {
@@ -71,14 +77,17 @@ public class PlaceOrderThread extends Thread {
                     if (flag) {
                         num = Math.min(num, this.num);
                         num = AccountCache.getNum(currency, num, price);
-                        num = Math.round(num * 10000 - 0.5) / 10000D;
-                        String id = (String) fcoinApi.orders(symbol, "buy", "limit", price + "", num + "");
-                        if (StringUtils.isNotBlank(id)) {
-                            buy = new Order(id, symbol, price, num);
-                            orderList.addBuyOrder(buy);
-                            AccountCache.deleteAvailable(currency, num, price);
-                        } else {
-                            flag = false;
+                        BigDecimal b = new BigDecimal(num);
+                        num = b.setScale(decimal.getAmount_decimal(), BigDecimal.ROUND_DOWN).doubleValue();
+                        if (num > 0.0) {
+                            String id = (String) fcoinApi.orders(symbol, "buy", "limit", price + "", num + "");
+                            if (StringUtils.isNotBlank(id)) {
+                                buy = new Order(id, symbol, price, num);
+                                orderList.addBuyOrder(buy);
+                                AccountCache.deleteAvailable(currency, num, price);
+                            } else {
+                                flag = false;
+                            }
                         }
                     }
                     if (flag) {
@@ -89,7 +98,8 @@ public class PlaceOrderThread extends Thread {
                                 double nn = AccountCache.getNum(this.coin, num, 1d);
                                 if (nn == num) {
                                     double newPrice = price * profit;
-                                    newPrice = Math.round(newPrice * 100 + 0.5) / 100D;
+                                    BigDecimal b = new BigDecimal(newPrice);
+                                    newPrice = b.setScale(decimal.getPrice_decimal(), BigDecimal.ROUND_UP).doubleValue();
                                     String id1 = (String) fcoinApi.orders(symbol, "sell", "limit", newPrice + "", num + "");
                                     if (StringUtils.isNotBlank(id1)) {
                                         f = false;
@@ -112,9 +122,13 @@ public class PlaceOrderThread extends Thread {
                         }
                     }
                 }
-                Thread.sleep(4 * sleepTime);
             } catch (Throwable t) {
                 logger.error("place order error!!!", t);
+            } finally {
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (Throwable e) {
+                }
             }
         }
     }

@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class AccountSyncThread extends Thread {
     private static final Logger logger = LoggerFactory.getLogger(AccountSyncThread.class);
-    private static final long sleepTimes = Long.valueOf(ConfigHandler.getConf("btc.account.sleep","3000"));
+    private static final long sleepTimes = Long.valueOf(ConfigHandler.getConf("btc.account.sleep", "3000"));
     private static FcoinApi fcoinApi = FcoinApiHandler.getInstance();
 
     public AccountSyncThread() {
@@ -21,9 +21,13 @@ public class AccountSyncThread extends Thread {
         while (true) {
             try {
                 update();
-                Thread.sleep(sleepTimes);
             } catch (Throwable e) {
                 logger.error("get account error!!!", e);
+            } finally {
+                try {
+                    Thread.sleep(sleepTimes);
+                } catch (Throwable t) {
+                }
             }
         }
     }

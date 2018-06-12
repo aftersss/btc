@@ -36,15 +36,22 @@ public class CheckOrderThread extends Thread {
                     }
                     Map<String, String> buyMap = (Map<String, String>) fcoinApi.getOrder(pair.getBuy().getId());
                     Map<String, String> sellMap = (Map<String, String>) fcoinApi.getOrder(pair.getSell().getId());
+                    if (buyMap == null || sellMap == null) {
+                        continue;
+                    }
                     if ("filled".equalsIgnoreCase(buyMap.get("state")) && "filled".equalsIgnoreCase(sellMap.get("state"))) {
                         orderList.removeOrder(pair.getBuy().getId());
                         Writer.addFinish(pair);
                     }
                     Thread.sleep(sleepTime * 8);
                 }
-                Thread.sleep(sleepTime * 10);
             } catch (Throwable t) {
                 logger.error("check order error!!!", t);
+            } finally {
+                try {
+                    Thread.sleep(sleepTime * 10);
+                } catch (Throwable e) {
+                }
             }
         }
     }
