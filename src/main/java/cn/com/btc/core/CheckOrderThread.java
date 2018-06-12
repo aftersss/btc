@@ -1,7 +1,6 @@
 package cn.com.btc.core;
 
 import cn.com.btc.ft.FcoinApi;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,13 +28,13 @@ public class CheckOrderThread extends Thread {
     public void run() {
         while (!ShutdownHook.isShutDown()) {
             try {
-                Map<String, Pair<Order, Order>> orders = orderList.getOrders();
+                Map<String, Pair> orders = orderList.getOrders();
                 if (orders != null && orders.size() > 0) {
                     List<Map<String, String>> mapList = (List<Map<String, String>>) fcoinApi.queryOrderList(symbol, "submitted", "1", "0", limit);
                     if (mapList != null) {
                         for (Map<String, String> map : mapList) {
                             String id = map.get("id");
-                            Pair<Order, Order> pair = orders.get(id);
+                            Pair pair = orders.get(id);
                             if (pair != null) {
                                 orders.remove(id);
                             }
@@ -46,7 +45,7 @@ public class CheckOrderThread extends Thread {
                         if (mapList1 != null) {
                             for (Map<String, String> map : mapList1) {
                                 String id = map.get("id");
-                                Pair<Order, Order> pair = orders.get(id);
+                                Pair pair = orders.get(id);
                                 if (pair != null) {
                                     orders.remove(id);
                                 }
@@ -54,8 +53,8 @@ public class CheckOrderThread extends Thread {
                         }
                     }
                     if (orders.size() > 0) {
-                        for (Pair<Order, Order> pair : orders.values()) {
-                            orderList.removeOrder(pair.getLeft().getId());
+                        for (Pair pair : orders.values()) {
+                            orderList.removeOrder(pair.getBuy().getId());
                             Writer.addFinish(pair);
                         }
                     }

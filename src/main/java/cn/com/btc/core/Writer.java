@@ -2,7 +2,6 @@ package cn.com.btc.core;
 
 import cn.com.btc.utils.CommonUntil;
 import cn.com.btc.utils.MyDateFormat;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,14 +17,14 @@ public class Writer extends Thread {
     private static String limitTime = null;
     private static FileWriter orderWriter = null;
     private static FileWriter finishWriter = null;
-    private static ConcurrentLinkedQueue<Pair<Order, Order>> orderQueue = new ConcurrentLinkedQueue<>();
-    private static ConcurrentLinkedQueue<Pair<Order, Order>> finishQueue = new ConcurrentLinkedQueue<>();
+    private static ConcurrentLinkedQueue<Pair> orderQueue = new ConcurrentLinkedQueue<>();
+    private static ConcurrentLinkedQueue<Pair> finishQueue = new ConcurrentLinkedQueue<>();
 
-    public static void addOrder(Pair<Order, Order> order) {
+    public static void addOrder(Pair order) {
         orderQueue.add(order);
     }
 
-    public static void addFinish(Pair<Order, Order> order) {
+    public static void addFinish(Pair order) {
         finishQueue.add(order);
     }
 
@@ -61,20 +60,20 @@ public class Writer extends Thread {
             }
             while (!orderQueue.isEmpty()) {
                 String t = MyDateFormat.format("yyyy-MM-dd HH:mm:ss", new Date());
-                Pair<Order, Order> pair = orderQueue.poll();
+                Pair pair = orderQueue.poll();
                 assert pair != null;
-                orderWriter.write(t + " " + pair.getLeft().getSymbol() + " " + pair.getLeft().getNum() +
-                        " " + pair.getLeft().getId() + " " + pair.getLeft().getPrice() +
-                        " " + pair.getRight().getId() + " " + pair.getRight().getPrice() + "\n");
+                orderWriter.write(t + " " + pair.getBuy().getSymbol() + " " + pair.getBuy().getNum() +
+                        " " + pair.getBuy().getId() + " " + pair.getBuy().getPrice() +
+                        " " + pair.getSell().getId() + " " + pair.getSell().getPrice() + "\n");
             }
             orderWriter.flush();
             while (!finishQueue.isEmpty()) {
                 String t = MyDateFormat.format("yyyy-MM-dd HH:mm:ss", new Date());
-                Pair<Order, Order> pair = finishQueue.poll();
+                Pair pair = finishQueue.poll();
                 assert pair != null;
-                finishWriter.write(t + " " + pair.getLeft().getSymbol() + " " + pair.getLeft().getNum() +
-                        " " + pair.getLeft().getId() + " " + pair.getLeft().getPrice() +
-                        " " + pair.getRight().getId() + " " + pair.getRight().getPrice() + "\n");
+                finishWriter.write(t + " " + pair.getBuy().getSymbol() + " " + pair.getBuy().getNum() +
+                        " " + pair.getBuy().getId() + " " + pair.getBuy().getPrice() +
+                        " " + pair.getSell().getId() + " " + pair.getSell().getPrice() + "\n");
             }
             finishWriter.flush();
         } catch (Throwable t) {
@@ -82,8 +81,8 @@ public class Writer extends Thread {
         }
     }
 
-    public static Map<String, Map<String, Pair<Order, Order>>> load() throws IOException {
-        Map<String, Map<String, Pair<Order, Order>>> mapMap = new HashMap<>();
+    public static Map<String, Map<String, Pair>> load() throws IOException {
+        Map<String, Map<String, Pair>> mapMap = new HashMap<>();
         Calendar calendar = Calendar.getInstance();
         String now = MyDateFormat.format("yyyyMMdd", calendar.getTime());
         calendar.add(Calendar.DAY_OF_MONTH, -1);
@@ -100,12 +99,8 @@ public class Writer extends Thread {
                 String symbol = ll[1];
                 Order buy = new Order(ll[3], symbol, Double.parseDouble(ll[4]), Double.parseDouble(ll[2]));
                 Order sell = new Order(ll[5], symbol, Double.parseDouble(ll[6]), Double.parseDouble(ll[2]));
-                Map<String, Pair<Order, Order>> map = mapMap.get(symbol);
-                if (map == null) {
-                    map = new HashMap<>();
-                    mapMap.put(symbol, map);
-                }
-                map.put(buy.getId(), Pair.of(buy, sell));
+                Map<String, Pair> map = mapMap.computeIfAbsent(symbol, k -> new HashMap<>());
+                map.put(buy.getId(), new Pair(buy, sell));
             }
             br.close();
         }
@@ -117,12 +112,8 @@ public class Writer extends Thread {
                 String symbol = ll[1];
                 Order buy = new Order(ll[3], symbol, Double.parseDouble(ll[4]), Double.parseDouble(ll[2]));
                 Order sell = new Order(ll[5], symbol, Double.parseDouble(ll[6]), Double.parseDouble(ll[2]));
-                Map<String, Pair<Order, Order>> map = mapMap.get(symbol);
-                if (map == null) {
-                    map = new HashMap<>();
-                    mapMap.put(symbol, map);
-                }
-                map.put(buy.getId(), Pair.of(buy, sell));
+                Map<String, Pair> map = mapMap.computeIfAbsent(symbol, k -> new HashMap<>());
+                map.put(buy.getId(), new Pair(buy, sell));
             }
             br.close();
         }
@@ -133,7 +124,7 @@ public class Writer extends Thread {
                 String[] ll = line.split(" ");
                 String symbol = ll[1];
                 String id = ll[3];
-                Map<String, Pair<Order, Order>> map = mapMap.get(symbol);
+                Map<String, Pair> map = mapMap.get(symbol);
                 if (map == null) {
                     continue;
                 }
@@ -148,7 +139,7 @@ public class Writer extends Thread {
                 String[] ll = line.split(" ");
                 String symbol = ll[1];
                 String id = ll[3];
-                Map<String, Pair<Order, Order>> map = mapMap.get(symbol);
+                Map<String, Pair> map = mapMap.get(symbol);
                 if (map == null) {
                     continue;
                 }

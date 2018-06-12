@@ -2,7 +2,6 @@ package cn.com.btc;
 
 import cn.com.btc.core.*;
 import cn.com.btc.utils.CommonUntil;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.PropertyConfigurator;
 
 import java.io.File;
@@ -17,7 +16,7 @@ public class Launcher {
     private static final Map<String, Thread> checkOrderMap = new HashMap<>();
 
     public static void main(String[] args) throws IOException {
-        Map<String, Map<String, Pair<Order, Order>>> mapMap = Writer.load();
+        Map<String, Map<String, Pair>> mapMap = Writer.load();
         PropertyConfigurator.configure(new File(CommonUntil.confDir, "log4j.properties").getAbsolutePath());
         accountSyncThread.start();
         writer.start();
@@ -25,7 +24,7 @@ public class Launcher {
         String[] symbols = symbolStr.split("\\s+");
         for (String symbol : symbols) {
             OrderList orderList = new OrderList(symbol, Integer.parseInt(ConfigHandler.getConf("btc." + symbol + ".oredersize", "10")));
-            Map<String, Pair<Order, Order>> map = mapMap.get(symbol);
+            Map<String, Pair> map = mapMap.get(symbol);
             if (map != null) {
                 orderList.setOrders(map);
             }

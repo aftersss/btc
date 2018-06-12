@@ -1,13 +1,11 @@
 package cn.com.btc.core;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.util.*;
 
 public class OrderList {
     private final int total;
     private final String symbol;
-    private Map<String, Pair<Order, Order>> orders = new HashMap<>();
+    private Map<String, Pair> orders = new HashMap<>();
     private final double fluctuate;
     private final int fluctuatesize;
 
@@ -22,17 +20,17 @@ public class OrderList {
         return total <= orders.size();
     }
 
-    public Map<String, Pair<Order, Order>> getOrders() {
+    public Map<String, Pair> getOrders() {
         return Collections.unmodifiableMap(orders);
     }
 
     public void addBuyOrder(Order buy) {
-        orders.put(buy.getId(), Pair.of(buy, null));
+        orders.put(buy.getId(), new Pair(buy, null));
     }
 
     public void addSellOrder(String buyid, Order sell) {
-        Pair<Order, Order> pair = orders.get(buyid);
-        pair.setValue(sell);
+        Pair pair = orders.get(buyid);
+        pair.setSell(sell);
         Writer.addOrder(pair);
     }
 
@@ -42,8 +40,8 @@ public class OrderList {
 
     public boolean isAvail(double price) {
         int count = 0;
-        for (Pair<Order, Order> pair : orders.values()) {
-            if (Math.abs(pair.getLeft().getPrice() - price) / price < fluctuate) {
+        for (Pair pair : orders.values()) {
+            if (Math.abs(pair.getBuy().getPrice() - price) / price < fluctuate) {
                 count++;
                 if (count > fluctuatesize) {
                     return false;
@@ -57,7 +55,7 @@ public class OrderList {
         return total;
     }
 
-    public void setOrders(Map<String, Pair<Order, Order>> orders) {
+    public void setOrders(Map<String, Pair> orders) {
         this.orders = orders;
     }
 }
