@@ -59,9 +59,17 @@ public class FcoinApi {
      *
      * @return json
      */
-    public String symbols() {
+    public Object symbols() {
         String url = UrlConfig.SYMBOLS.getUrl();
-        return httpExecute(url, UrlConfig.SYMBOLS.getMethod(), null, null, null, System.currentTimeMillis());
+        String json = httpExecute(url, UrlConfig.SYMBOLS.getMethod(), null, null, null, System.currentTimeMillis());
+        Map map = gson.fromJson(json, Map.class);
+        int status = ((Number) map.get("status")).intValue();
+        if (status == 0) {
+            return map.get("data");
+        } else {
+            logger.error("symbols error!!!" + json);
+            return null;
+        }
     }
 
     /**
