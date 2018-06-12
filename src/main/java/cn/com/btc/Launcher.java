@@ -10,12 +10,14 @@ import java.util.Map;
 
 public class Launcher {
     private static final AccountSyncThread accountSyncThread = new AccountSyncThread();
+    private static final Writer writer = new Writer();
     private static final Map<String, Thread> placeOrderMap = new HashMap<>();
     private static final Map<String, Thread> checkOrderMap = new HashMap<>();
 
     public static void main(String[] args) {
         PropertyConfigurator.configure(new File(CommonUntil.confDir, "log4j.properties").getAbsolutePath());
         accountSyncThread.start();
+        writer.start();
         String symbolStr = ConfigHandler.getConf("btc.symbol");
         String[] symbols = symbolStr.split("\\s+");
         for (String symbol : symbols) {

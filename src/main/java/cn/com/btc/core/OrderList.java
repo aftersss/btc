@@ -1,61 +1,59 @@
 package cn.com.btc.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.*;
 
 public class OrderList {
     private final int total;
     private final String symbol;
-    private final List<Order> orders = new ArrayList<>();
-    private final String intervalKey;
-    private final double interval;
+    private final Map<String, Pair<Order, Order>> orders = new HashMap<>();
+    private final double fluctuate;
+    private final int fluctuatesize;
 
     public OrderList(String symbol, int total) {
         this.total = total;
         this.symbol = symbol;
-        this.intervalKey = "btc." + symbol + ".interval";
-        this.interval = Double.valueOf(ConfigHandler.getConf(intervalKey, "1"));
+        this.fluctuate = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".fluctuate", "0.05"));
+        this.fluctuatesize = Integer.valueOf(ConfigHandler.getConf("btc." + symbol + ".fluctuatesize", "1"));
     }
 
     public boolean isSaturated() {
         return total <= orders.size();
     }
 
-    public List<Order> getOrders() {
-        return Collections.unmodifiableList(orders);
+    public Map<String, Pair<Order, Order>> getOrders() {
+        return Collections.unmodifiableMap(orders);
     }
 
-    public boolean isAval(double price) {
-        for (Order order : orders) {
-            if (Math.abs(order.getPrice() - price) <= interval) {
-                return false;
+    public void addBuyOrder(Order buy) {
+        orders.put(buy.getId(), Pair.of(buy, null));
+    }
+
+    public void addSellOrder(String buyid, Order sell) {
+        Pair<Order, Order> pair = orders.get(buyid);
+        pair.setValue(sell);
+        Writer.addOrder(pair);
+    }
+
+    public void removeOrder(String id) {
+        orders.remove(id);
+    }
+
+    public boolean isAvail(double price) {
+        int count = 0;
+        for (Pair<Order, Order> pair : orders.values()) {
+            if (Math.abs(pair.getLeft().getPrice() - price) / price < fluctuate) {
+                count++;
+                if (count > fluctuatesize) {
+                    return false;
+                }
             }
         }
         return true;
     }
 
-    public double getInterval() {
-        return interval;
-    }
-
-    public void addOrder(Order order) {
-        orders.add(order);
-    }
-
-    public void removeOrder(String id) {
-        int index = -1;
-        for (int i = 0; i < orders.size(); i++) {
-            if (id.equalsIgnoreCase(orders.get(i).getId())) {
-                index = i;
-            }
-        }
-        if (index >= 0) {
-            orders.remove(index);
-        }
-    }
-
-    public void removeOrder(Order order) {
-        orders.remove(order);
+    public int getTotal() {
+        return total;
     }
 }

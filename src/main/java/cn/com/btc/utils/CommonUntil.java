@@ -7,4 +7,5 @@ public class CommonUntil {
     //    public static File workingDir = binDir.getParentFile();
     public static File workingDir = binDir;
     public static File confDir = new File(workingDir, "conf");
+    public static File dataDir = new File(workingDir, "data");
 }

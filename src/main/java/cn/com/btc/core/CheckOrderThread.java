@@ -1,6 +1,7 @@
 package cn.com.btc.core;
 
 import cn.com.btc.ft.FcoinApi;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,49 +12,55 @@ public class CheckOrderThread extends Thread {
     private static final Logger logger = LoggerFactory.getLogger(CheckOrderThread.class);
     private final String symbol;
     private final OrderList orderList;
-    private final String currency;
     private final long sleepTime;
+    private final String limit;
     private FcoinApi fcoinApi = FcoinApiHandler.getInstance();
 
     public CheckOrderThread(String symbol, OrderList orderList) {
         this.symbol = symbol.replace("-", "");
-        this.currency = symbol.split("-")[1];
         this.orderList = orderList;
         this.sleepTime = Long.valueOf(ConfigHandler.getConf("btc.sleep", "1000"));
+        this.limit = (orderList.getTotal() * 2) + "";
         setName(this.symbol + "-check-order-thread");
+
     }
 
     @Override
     public void run() {
-        int count = 0;
         while (true) {
             try {
-                if (count >= 250) {
-                    count = 0;
-                    List<Order> orders = orderList.getOrders();
-                    for (Order order : orders) {
-                        Map<String, Object> result = (Map<String, Object>) fcoinApi.getOrder(order.getId());
-                        if (result != null) {
-                            String state = (String) result.get("state");
-                            if ("filled".equalsIgnoreCase(state)) {
-                                orderList.removeOrder(order);
+                Map<String, Pair<Order, Order>> orders = orderList.getOrders();
+                if (orders != null && orders.size() > 0) {
+                    List<Map<String, String>> mapList = (List<Map<String, String>>) fcoinApi.queryOrderList(symbol, "submitted", "1", "0", limit);
+                    if (mapList != null) {
+                        for (Map<String, String> map : mapList) {
+                            String id = map.get("id");
+                            Pair<Order, Order> pair = orders.get(id);
+                            if (pair != null) {
+                                orders.remove(id);
                             }
                         }
-                        Thread.sleep(sleepTime);
                     }
-                } else {
-                    List<Order> orders = orderList.getOrders();
-                    Order order = orders.get(orders.size() - 1);
-                    Map<String, Object> result = (Map<String, Object>) fcoinApi.getOrder(order.getId());
-                    if (result != null) {
-                        String state = (String) result.get("state");
-                        if ("filled".equalsIgnoreCase(state)) {
-                            orderList.removeOrder(order);
+                    if (orders.size() > 0) {
+                        List<Map<String, String>> mapList1 = (List<Map<String, String>>) fcoinApi.queryOrderList(symbol, "partial_filled", "1", "0", limit);
+                        if (mapList1 != null) {
+                            for (Map<String, String> map : mapList1) {
+                                String id = map.get("id");
+                                Pair<Order, Order> pair = orders.get(id);
+                                if (pair != null) {
+                                    orders.remove(id);
+                                }
+                            }
+                        }
+                    }
+                    if (orders.size() > 0) {
+                        for (Pair<Order, Order> pair : orders.values()) {
+                            orderList.removeOrder(pair.getLeft().getId());
+                            Writer.addFinish(pair);
                         }
                     }
                 }
-                count++;
-                Thread.sleep(sleepTime);
+                Thread.sleep(sleepTime * 30);
             } catch (Throwable t) {
                 logger.error("check order error!!!", t);
             }
