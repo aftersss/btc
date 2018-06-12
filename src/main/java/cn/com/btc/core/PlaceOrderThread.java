@@ -36,7 +36,7 @@ public class PlaceOrderThread extends Thread {
 
     @Override
     public void run() {
-        while (true) {
+        while (ShutdownHook.isShutDown()) {
             try {
                 if (!orderList.isSaturated()) {
                     boolean flag = false;
@@ -67,6 +67,7 @@ public class PlaceOrderThread extends Thread {
                         }
                     }
                     if (flag) {
+                        int count = 0;
                         while (true) {
                             try {
                                 double nn = AccountCache.getNum(this.coin, num, 1d);
@@ -75,6 +76,13 @@ public class PlaceOrderThread extends Thread {
                                     if (StringUtils.isNotBlank(id1)) {
                                         Order sell = new Order(id1, symbol, price * profit, num);
                                         orderList.addSellOrder(buy.getId(), sell);
+                                        break;
+                                    }
+                                }
+                                if (ShutdownHook.isShutDown()) {
+                                    count++;
+                                    if (count > 2) {
+                                        logger.error("A buy is error!!! id=" + buy.getId());
                                         break;
                                     }
                                 }

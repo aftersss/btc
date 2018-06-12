@@ -27,7 +27,7 @@ public class CheckOrderThread extends Thread {
 
     @Override
     public void run() {
-        while (true) {
+        while (ShutdownHook.isShutDown()) {
             try {
                 Map<String, Pair<Order, Order>> orders = orderList.getOrders();
                 if (orders != null && orders.size() > 0) {

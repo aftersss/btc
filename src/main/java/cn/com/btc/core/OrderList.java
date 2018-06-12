@@ -7,7 +7,7 @@ import java.util.*;
 public class OrderList {
     private final int total;
     private final String symbol;
-    private final Map<String, Pair<Order, Order>> orders = new HashMap<>();
+    private Map<String, Pair<Order, Order>> orders = new HashMap<>();
     private final double fluctuate;
     private final int fluctuatesize;
 
@@ -55,5 +55,9 @@ public class OrderList {
 
     public int getTotal() {
         return total;
+    }
+
+    public void setOrders(Map<String, Pair<Order, Order>> orders) {
+        this.orders = orders;
     }
 }
