@@ -22,6 +22,7 @@ public class PlaceOrderThread extends Thread {
     private final String coin;
     private final long sleepTime;
     private final boolean isFt;
+    private final double discount;
     private FcoinApi fcoinApi = FcoinApiHandler.getInstance();
 
     public PlaceOrderThread(String symbol, OrderList orderList) {
@@ -34,6 +35,7 @@ public class PlaceOrderThread extends Thread {
         this.level = ConfigHandler.getConf("btc." + symbol + ".level", "L20");
         this.num = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".num", "1"));
         this.profit = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".profit", "0.001")) + 1;
+        this.discount = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".discount", "0.5"));
         this.sleepTime = Long.valueOf(ConfigHandler.getConf("btc.sleep", "1000"));
         setName(this.symbol + "-place-order-thread");
     }
@@ -61,7 +63,7 @@ public class PlaceOrderThread extends Thread {
                         List<Number> asks = (List<Number>) map.get("asks");
                         if (asks.size() > 0) {
                             price = asks.get(0).doubleValue();
-                            num += asks.get(1).doubleValue() * 0.5;
+                            num += asks.get(1).doubleValue() * discount;
                             flag = orderList.isAvail(price);
                         }
                     }
