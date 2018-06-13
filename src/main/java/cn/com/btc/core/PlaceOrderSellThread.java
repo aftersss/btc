@@ -78,10 +78,10 @@ public class PlaceOrderSellThread extends Thread {
                     Order sell = null;
                     if (flag) {
                         num = Math.min(num, this.num);
-                        num = AccountCache.getNum(coin, num, price);
+                        num = AccountCache.getNum(coin, num, 1 / price);
                         BigDecimal b = new BigDecimal(num);
                         num = b.setScale(decimal.getAmount_decimal(), BigDecimal.ROUND_DOWN).doubleValue();
-                        if (num > minNum) {
+                        if (num >= minNum && num > 0) {
                             String id = (String) fcoinApi.orders(symbol, "sell", "limit", price + "", num + "");
                             if (StringUtils.isNotBlank(id)) {
                                 sell = new Order(id, symbol, price, num);

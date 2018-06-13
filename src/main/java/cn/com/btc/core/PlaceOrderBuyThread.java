@@ -81,7 +81,7 @@ public class PlaceOrderBuyThread extends Thread {
                         num = AccountCache.getNum(currency, num, price);
                         BigDecimal b = new BigDecimal(num);
                         num = b.setScale(decimal.getAmount_decimal(), BigDecimal.ROUND_DOWN).doubleValue();
-                        if (num > minNum) {
+                        if (num > minNum && num > 0) {
                             String id = (String) fcoinApi.orders(symbol, "buy", "limit", price + "", num + "");
                             if (StringUtils.isNotBlank(id)) {
                                 buy = new Order(id, symbol, price, num);
