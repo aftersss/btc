@@ -75,7 +75,7 @@ public class PlaceOrderSellThread extends Thread {
                             num += bids.get(1).doubleValue() * discount;
                             flag = orderList.isAvail(price);
                             if (!flag) {
-                                logger.info("fluctuate is full!!! price=" + price + " order=" + orderList.getOrders());
+                                logger.info("fluctuate is full!!! price=" + price);
                             }
                         }
                     } else {
