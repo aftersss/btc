@@ -73,7 +73,7 @@ public class PlaceOrderThread extends Thread {
                             flag = orderList.isAvail(price);
                         }
                     } else {
-                        
+
                     }
                     Order buy = null;
                     if (flag) {
@@ -90,6 +90,8 @@ public class PlaceOrderThread extends Thread {
                             } else {
                                 flag = false;
                             }
+                        } else {
+                            flag = false;
                         }
                     }
                     if (flag) {
