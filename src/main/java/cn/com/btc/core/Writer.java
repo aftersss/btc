@@ -160,7 +160,7 @@ public class Writer extends Thread {
             br.close();
         }
         if (yesFinish.exists() && yesFinish.isFile()) {
-            BufferedReader br = new BufferedReader(new FileReader(nowFinish));
+            BufferedReader br = new BufferedReader(new FileReader(yesFinish));
             String line = null;
             while ((line = br.readLine()) != null) {
                 String[] ll = line.split(" ");

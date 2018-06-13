@@ -59,7 +59,7 @@ public class OrderList {
         for (Pair pair : orders.values()) {
             if (Math.abs(pair.getBuy().getPrice() - price) / price < fluctuate) {
                 count++;
-                if (count > fluctuatesize) {
+                if (count >= fluctuatesize) {
                     return false;
                 }
             }
