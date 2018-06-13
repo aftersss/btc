@@ -78,7 +78,7 @@ public class PlaceOrderSellThread extends Thread {
                     Order sell = null;
                     if (flag) {
                         num = Math.min(num, this.num);
-                        num = AccountCache.getNum(coin, num, 1 / price);
+                        num = AccountCache.getNum(coin, num, 1d);
                         BigDecimal b = new BigDecimal(num);
                         num = b.setScale(decimal.getAmount_decimal(), BigDecimal.ROUND_DOWN).doubleValue();
                         if (num >= minNum && num > 0) {
