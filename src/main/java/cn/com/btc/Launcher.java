@@ -13,8 +13,9 @@ import java.util.Map;
 public class Launcher {
     private static final AccountSyncThread accountSyncThread = new AccountSyncThread();
     private static final Writer writer = new Writer();
-    private static final Map<String, Thread> placeOrderMap = new HashMap<>();
-    private static final Map<String, Thread> checkOrderMap = new HashMap<>();
+    private static final Map<String, PlaceOrderBuyThread> buyPlaceOrderMap = new HashMap<>();
+    private static final Map<String, PlaceOrderSellThread> sellPlaceOrderMap = new HashMap<>();
+    private static final Map<String, CheckOrderThread> checkOrderMap = new HashMap<>();
 
     public static void main(String[] args) throws IOException {
         Runtime.getRuntime().addShutdownHook(new ShutdownHook());
@@ -34,17 +35,35 @@ public class Launcher {
         String[] symbols = symbolStr.split("\\s+");
         for (String symbol : symbols) {
             String symbolReal = symbol.replace("-", "");
-            OrderList orderList = new OrderList(symbol, Integer.parseInt(ConfigHandler.getConf("btc." + symbol + ".ordersize", "10")));
-            Map<String, Pair> map = mapMap.get(symbolReal);
-            if (map != null) {
-                orderList.setOrders(map);
+            String type = ConfigHandler.getConf("btc." + symbol + ".type", "buy");
+            int size = Integer.parseInt(ConfigHandler.getConf("btc." + symbol + ".ordersize", "10"));
+            if ("all".equalsIgnoreCase(type) || "buy".equalsIgnoreCase(type)) {
+                OrderList buyOrderList = new OrderList(symbol, size);
+                Map<String, Pair> buyMap = mapMap.get(symbolReal + "buy");
+                if (buyMap != null) {
+                    buyOrderList.setOrders(buyMap);
+                }
+                PlaceOrderBuyThread placeOrderBuyThread = new PlaceOrderBuyThread(symbol, buyOrderList, decimalMap.get(symbolReal));
+                buyPlaceOrderMap.put(symbol, placeOrderBuyThread);
+                placeOrderBuyThread.start();
+                CheckOrderThread buyCheckOrderThread = new CheckOrderThread(symbol, buyOrderList);
+                checkOrderMap.put(symbol, buyCheckOrderThread);
+                buyCheckOrderThread.start();
             }
-            PlaceOrderThread placeOrderThread = new PlaceOrderThread(symbol, orderList, decimalMap.get(symbolReal));
-            placeOrderMap.put(symbol, placeOrderThread);
-            placeOrderThread.start();
-            CheckOrderThread checkOrderThread = new CheckOrderThread(symbol, orderList);
-            checkOrderMap.put(symbol, checkOrderThread);
-            checkOrderThread.start();
+
+            if ("all".equalsIgnoreCase(type) || "sell".equalsIgnoreCase(type)) {
+                OrderList sellOrderList = new OrderList(symbol, size);
+                Map<String, Pair> sellMap = mapMap.get(symbolReal + "sell");
+                if (sellMap != null) {
+                    sellOrderList.setOrders(sellMap);
+                }
+                PlaceOrderSellThread placeOrderSellThread = new PlaceOrderSellThread(symbol, sellOrderList, decimalMap.get(symbolReal));
+                sellPlaceOrderMap.put(symbol, placeOrderSellThread);
+                placeOrderSellThread.start();
+                CheckOrderThread sellCheckOrderThread = new CheckOrderThread(symbol, sellOrderList);
+                checkOrderMap.put(symbol, sellCheckOrderThread);
+                sellCheckOrderThread.start();
+            }
         }
     }
 }

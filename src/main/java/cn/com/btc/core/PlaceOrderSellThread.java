@@ -41,7 +41,7 @@ public class PlaceOrderSellThread extends Thread {
         this.discount = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".discount", "0.5"));
         this.sleepTime = Long.valueOf(ConfigHandler.getConf("btc.sleep", "1000"));
         this.minNum = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".minnum", "0"));
-        setName(this.symbol + "-place-order-thread");
+        setName(this.symbol + "-sell-place-order-thread");
     }
 
     @Override
@@ -75,17 +75,17 @@ public class PlaceOrderSellThread extends Thread {
                             flag = orderList.isAvail(price);
                         }
                     }
-                    Order buy = null;
+                    Order sell = null;
                     if (flag) {
                         num = Math.min(num, this.num);
-                        num = AccountCache.getNum(currency, num, price);
+                        num = AccountCache.getNum(coin, num, price);
                         BigDecimal b = new BigDecimal(num);
                         num = b.setScale(decimal.getAmount_decimal(), BigDecimal.ROUND_DOWN).doubleValue();
                         if (num > minNum) {
                             String id = (String) fcoinApi.orders(symbol, "sell", "limit", price + "", num + "");
                             if (StringUtils.isNotBlank(id)) {
-                                buy = new Order(id, symbol, price, num);
-                                orderList.addBuyOrder(buy);
+                                sell = new Order(id, symbol, price, num);
+                                orderList.addSellOrder(sell);
                                 AccountCache.deleteAvailable(coin, num, price);
                             } else {
                                 flag = false;
@@ -99,7 +99,7 @@ public class PlaceOrderSellThread extends Thread {
                         boolean f = true;
                         while (f) {
                             try {
-                                double nn = AccountCache.getNum(this.coin, num, 1d);
+                                double nn = AccountCache.getNum(currency, num, 1d);
                                 if (nn == num) {
                                     double newPrice = price * profit;
                                     BigDecimal b = new BigDecimal(newPrice);
@@ -107,15 +107,15 @@ public class PlaceOrderSellThread extends Thread {
                                     String id1 = (String) fcoinApi.orders(symbol, "buy", "limit", newPrice + "", num + "");
                                     if (StringUtils.isNotBlank(id1)) {
                                         f = false;
-                                        Order sell = new Order(id1, symbol, newPrice, num);
-                                        orderList.addSellOrder(buy.getId(), sell);
+                                        Order buy = new Order(id1, symbol, newPrice, num);
+                                        orderList.addBuyOrder(sell.getId(), buy);
                                         break;
                                     }
                                 }
                                 if (ShutdownHook.isShutDown()) {
                                     count++;
                                     if (count > 2) {
-                                        logger.error("A buy is error!!! id=" + buy.getId());
+                                        logger.error("A buy is error!!! id=" + sell.getId());
                                         break;
                                     }
                                 }

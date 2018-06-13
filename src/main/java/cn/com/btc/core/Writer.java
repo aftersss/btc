@@ -55,15 +55,15 @@ public class Writer extends Thread {
                 }
                 calendar.add(Calendar.DAY_OF_MONTH, 1);
                 limitTime = MyDateFormat.format("yyyyMMdd", calendar.getTime());
-                if(!CommonUntil.dataDir.exists()){
+                if (!CommonUntil.dataDir.exists()) {
                     CommonUntil.dataDir.mkdirs();
                 }
                 File orderFile = new File(CommonUntil.dataDir, "order-" + time + ".dat");
                 File finsihFile = new File(CommonUntil.dataDir, "finish-" + time + ".dat");
-                if (!orderFile.exists()){
+                if (!orderFile.exists()) {
                     orderFile.createNewFile();
                 }
-                if (!finsihFile.exists()){
+                if (!finsihFile.exists()) {
                     finsihFile.createNewFile();
                 }
                 orderWriter = new FileWriter(orderFile, true);
@@ -73,7 +73,7 @@ public class Writer extends Thread {
                 String t = MyDateFormat.format("yyyyMMddHHmmss", new Date());
                 Pair pair = orderQueue.poll();
                 assert pair != null;
-                orderWriter.write(t + " " + pair.getBuy().getSymbol() + " " + pair.getBuy().getNum() +
+                orderWriter.write(t + " " + pair.getType() + " " + pair.getBuy().getSymbol() + " " + pair.getBuy().getNum() +
                         " " + pair.getBuy().getId() + " " + pair.getBuy().getPrice() +
                         " " + pair.getSell().getId() + " " + pair.getSell().getPrice() + "\n");
             }
@@ -82,7 +82,7 @@ public class Writer extends Thread {
                 String t = MyDateFormat.format("yyyyMMddHHmmss", new Date());
                 Pair pair = finishQueue.poll();
                 assert pair != null;
-                finishWriter.write(t + " " + pair.getBuy().getSymbol() + " " + pair.getBuy().getNum() +
+                finishWriter.write(t + " " + pair.getType() + " " + pair.getBuy().getSymbol() + " " + pair.getBuy().getNum() +
                         " " + pair.getBuy().getId() + " " + pair.getBuy().getPrice() +
                         " " + pair.getSell().getId() + " " + pair.getSell().getPrice() + "\n");
             }
@@ -107,11 +107,16 @@ public class Writer extends Thread {
             String line = null;
             while ((line = br.readLine()) != null) {
                 String[] ll = line.split(" ");
-                String symbol = ll[1];
-                Order buy = new Order(ll[3], symbol, Double.parseDouble(ll[4]), Double.parseDouble(ll[2]));
-                Order sell = new Order(ll[5], symbol, Double.parseDouble(ll[6]), Double.parseDouble(ll[2]));
+                String symbol = ll[2];
+                String type = ll[1];
+                Order buy = new Order(ll[4], symbol, Double.parseDouble(ll[5]), Double.parseDouble(ll[3]));
+                Order sell = new Order(ll[6], symbol, Double.parseDouble(ll[7]), Double.parseDouble(ll[3]));
                 Map<String, Pair> map = mapMap.computeIfAbsent(symbol, k -> new HashMap<>());
-                map.put(buy.getId(), new Pair(buy, sell));
+                if ("buy".equalsIgnoreCase(type)) {
+                    map.put(buy.getId() + type, new Pair(type, buy, sell));
+                } else {
+                    map.put(sell.getId() + type, new Pair(type, buy, sell));
+                }
             }
             br.close();
         }
@@ -120,11 +125,16 @@ public class Writer extends Thread {
             String line = null;
             while ((line = br.readLine()) != null) {
                 String[] ll = line.split(" ");
-                String symbol = ll[1];
-                Order buy = new Order(ll[3], symbol, Double.parseDouble(ll[4]), Double.parseDouble(ll[2]));
-                Order sell = new Order(ll[5], symbol, Double.parseDouble(ll[6]), Double.parseDouble(ll[2]));
+                String symbol = ll[2];
+                String type = ll[1];
+                Order buy = new Order(ll[4], symbol, Double.parseDouble(ll[5]), Double.parseDouble(ll[3]));
+                Order sell = new Order(ll[6], symbol, Double.parseDouble(ll[7]), Double.parseDouble(ll[3]));
                 Map<String, Pair> map = mapMap.computeIfAbsent(symbol, k -> new HashMap<>());
-                map.put(buy.getId(), new Pair(buy, sell));
+                if ("buy".equalsIgnoreCase(type)) {
+                    map.put(buy.getId() + type, new Pair(type, buy, sell));
+                } else {
+                    map.put(sell.getId() + type, new Pair(type, buy, sell));
+                }
             }
             br.close();
         }
@@ -133,13 +143,19 @@ public class Writer extends Thread {
             String line = null;
             while ((line = br.readLine()) != null) {
                 String[] ll = line.split(" ");
-                String symbol = ll[1];
-                String id = ll[3];
+                String symbol = ll[2];
+                String type = ll[1];
+                String id;
+                if ("buy".equalsIgnoreCase(type)) {
+                    id = ll[4];
+                } else {
+                    id = ll[6];
+                }
                 Map<String, Pair> map = mapMap.get(symbol);
                 if (map == null) {
                     continue;
                 }
-                map.remove(id);
+                map.remove(id + type);
             }
             br.close();
         }
@@ -148,13 +164,19 @@ public class Writer extends Thread {
             String line = null;
             while ((line = br.readLine()) != null) {
                 String[] ll = line.split(" ");
-                String symbol = ll[1];
-                String id = ll[3];
+                String symbol = ll[2];
+                String type = ll[1];
+                String id;
+                if ("buy".equalsIgnoreCase(type)) {
+                    id = ll[4];
+                } else {
+                    id = ll[6];
+                }
                 Map<String, Pair> map = mapMap.get(symbol);
                 if (map == null) {
                     continue;
                 }
-                map.remove(id);
+                map.remove(id + type);
             }
             br.close();
         }

@@ -27,12 +27,22 @@ public class OrderList {
     }
 
     public void addBuyOrder(Order buy) {
-        orders.put(buy.getId(), new Pair(buy, null));
+        orders.put(buy.getId(), new Pair("buy", buy, null));
     }
 
     public void addSellOrder(String buyid, Order sell) {
         Pair pair = orders.get(buyid);
         pair.setSell(sell);
+        Writer.addOrder(pair);
+    }
+
+    public void addSellOrder(Order sell) {
+        orders.put(sell.getId(), new Pair("sell", null, sell));
+    }
+
+    public void addBuyOrder(String sellid, Order sell) {
+        Pair pair = orders.get(sellid);
+        pair.setBuy(sell);
         Writer.addOrder(pair);
     }
 

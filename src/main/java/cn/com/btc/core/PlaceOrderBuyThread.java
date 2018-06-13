@@ -41,7 +41,7 @@ public class PlaceOrderBuyThread extends Thread {
         this.discount = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".discount", "0.5"));
         this.sleepTime = Long.valueOf(ConfigHandler.getConf("btc.sleep", "1000"));
         this.minNum = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".minnum", "0"));
-        setName(this.symbol + "-place-order-thread");
+        setName(this.symbol + "-buy-place-order-thread");
     }
 
     @Override

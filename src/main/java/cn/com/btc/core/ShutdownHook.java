@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ShutdownHook extends Thread {
-    private static final Logger logger = LoggerFactory.getLogger(PlaceOrderThread.class);
+    private static final Logger logger = LoggerFactory.getLogger(ShutdownHook.class);
     private static boolean isShutDown = false;
 
     @Override
