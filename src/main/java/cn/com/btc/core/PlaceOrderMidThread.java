@@ -114,7 +114,7 @@ public class PlaceOrderMidThread extends Thread {
                         boolean f = true;
                         double newPrice = price * (1 + profit * (1 - this.buy));
                         BigDecimal b = new BigDecimal(newPrice);
-                        newPrice = b.setScale(decimal.getPrice_decimal(), BigDecimal.ROUND_UP).doubleValue();
+                        newPrice = b.setScale(decimal.getPrice_decimal(), BigDecimal.ROUND_DOWN).doubleValue();
                         while (f) {
                             try {
                                 double nn = AccountCache.getNum(this.coin, num, 1d);
@@ -126,7 +126,11 @@ public class PlaceOrderMidThread extends Thread {
                                         logger.info(sell.toString());
                                         orderList.addSellOrder(buy.getId(), sell);
                                         break;
+                                    } else {
+                                        logger.info(" sell order fail!!!");
                                     }
+                                } else {
+                                    logger.info(" con't full num!!! nn" + nn + " num=" + num);
                                 }
                                 if (ShutdownHook.isShutDown()) {
                                     count++;
@@ -137,7 +141,7 @@ public class PlaceOrderMidThread extends Thread {
                                 }
                                 Thread.sleep(2 * sleepTime);
                             } catch (Throwable e) {
-                                logger.error("", e);
+                                logger.error("error!!!", e);
                             }
                         }
                     }
