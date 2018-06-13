@@ -31,7 +31,7 @@ public class CheckOrderThread extends Thread {
             try {
                 Map<String, Pair> orders = orderList.getOrders();
                 for (Pair pair : orders.values()) {
-                    if (pair.getSell() == null) {
+                    if (pair.getSell() == null || pair.getBuy() == null) {
                         continue;
                     }
                     Map<String, String> buyMap = (Map<String, String>) fcoinApi.getOrder(pair.getBuy().getId());
