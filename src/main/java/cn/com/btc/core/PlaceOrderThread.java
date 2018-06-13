@@ -23,6 +23,7 @@ public class PlaceOrderThread extends Thread {
     private final long sleepTime;
     private final boolean isFt;
     private final double discount;
+    private final double minNum;
     private final Decimal decimal;
     private FcoinApi fcoinApi = FcoinApiHandler.getInstance();
 
@@ -39,6 +40,7 @@ public class PlaceOrderThread extends Thread {
         this.profit = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".profit", "0.001")) + 1;
         this.discount = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".discount", "0.5"));
         this.sleepTime = Long.valueOf(ConfigHandler.getConf("btc.sleep", "1000"));
+        this.minNum = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".minnum", "0"));
         setName(this.symbol + "-place-order-thread");
     }
 
