@@ -8,6 +8,7 @@ public class Order {
     private double price;
     private double num;
     private long time;
+    private boolean isFinsih;
 
     public Order(String id, String symbol, double price, double num) {
         this.id = id;
@@ -15,6 +16,15 @@ public class Order {
         this.price = price;
         this.num = num;
         this.time = MyDateFormat.getLongTime();
+        this.isFinsih = false;
+    }
+
+    public void finish() {
+        this.isFinsih = true;
+    }
+
+    public boolean isFinish() {
+        return isFinsih;
     }
 
     public double getPrice() {

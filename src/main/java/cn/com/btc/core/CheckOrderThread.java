@@ -34,16 +34,30 @@ public class CheckOrderThread extends Thread {
                     if (pair.getSell() == null || pair.getBuy() == null) {
                         continue;
                     }
-                    Map<String, String> buyMap = (Map<String, String>) fcoinApi.getOrder(pair.getBuy().getId());
-                    Map<String, String> sellMap = (Map<String, String>) fcoinApi.getOrder(pair.getSell().getId());
-                    if (buyMap == null || sellMap == null) {
-                        continue;
+                    if (!pair.getBuy().isFinish()) {
+                        Map<String, String> buyMap = (Map<String, String>) fcoinApi.getOrder(pair.getBuy().getId());
+                        if (buyMap == null) {
+                            continue;
+                        }
+                        if ("filled".equalsIgnoreCase(buyMap.get("state"))) {
+                            orderList.removeOrder(pair.getBuy().getId());
+                            Writer.addFinish(pair);
+                            pair.getBuy().finish();
+                        }
                     }
-                    if ("filled".equalsIgnoreCase(buyMap.get("state")) && "filled".equalsIgnoreCase(sellMap.get("state"))) {
-                        orderList.removeOrder(pair.getBuy().getId());
-                        Writer.addFinish(pair);
+                    Thread.sleep(sleepTime * 4);
+                    if (!pair.getSell().isFinish()) {
+                        Map<String, String> sellMap = (Map<String, String>) fcoinApi.getOrder(pair.getSell().getId());
+                        if (sellMap == null) {
+                            continue;
+                        }
+                        if ("filled".equalsIgnoreCase(sellMap.get("state"))) {
+                            orderList.removeOrder(pair.getBuy().getId());
+                            Writer.addFinish(pair);
+                            pair.getSell().finish();
+                        }
                     }
-                    Thread.sleep(sleepTime * 8);
+                    Thread.sleep(sleepTime * 4);
                 }
             } catch (Throwable t) {
                 logger.error("check order error!!!", t);
