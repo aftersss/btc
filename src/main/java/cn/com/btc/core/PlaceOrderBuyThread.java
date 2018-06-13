@@ -97,13 +97,13 @@ public class PlaceOrderBuyThread extends Thread {
                     if (flag) {
                         int count = 0;
                         boolean f = true;
+                        double newPrice = price * profit;
+                        BigDecimal b = new BigDecimal(newPrice);
+                        newPrice = b.setScale(decimal.getPrice_decimal(), BigDecimal.ROUND_UP).doubleValue();
                         while (f) {
                             try {
                                 double nn = AccountCache.getNum(this.coin, num, 1d);
                                 if (nn == num) {
-                                    double newPrice = price * profit;
-                                    BigDecimal b = new BigDecimal(newPrice);
-                                    newPrice = b.setScale(decimal.getPrice_decimal(), BigDecimal.ROUND_UP).doubleValue();
                                     String id1 = (String) fcoinApi.orders(symbol, "sell", "limit", newPrice + "", num + "");
                                     if (StringUtils.isNotBlank(id1)) {
                                         f = false;
