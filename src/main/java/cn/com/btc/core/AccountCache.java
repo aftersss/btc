@@ -1,12 +1,12 @@
 package cn.com.btc.core;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AccountCache {
-    private static final Map<String, Double> availableMap = new HashMap<>();
+    private static final Map<String, Double> availableMap = new ConcurrentHashMap<>();
 
-    public synchronized static void updateAvailable(String currency, double available) {
+    public static void updateAvailable(String currency, double available) {
         availableMap.put(currency, available);
     }
 
@@ -24,7 +24,7 @@ public class AccountCache {
         }
     }
 
-    public synchronized static void deleteAvailable(String currency, double num, double price) {
+    public static void deleteAvailable(String currency, double num, double price) {
         availableMap.put(currency, availableMap.get(currency) - num * price);
     }
 }
