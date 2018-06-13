@@ -40,8 +40,6 @@ public class CheckOrderThread extends Thread {
                             continue;
                         }
                         if ("filled".equalsIgnoreCase(buyMap.get("state"))) {
-                            orderList.removeOrder(pair.getBuy().getId());
-                            Writer.addFinish(pair);
                             pair.getBuy().finish();
                         }
                     }
@@ -52,10 +50,12 @@ public class CheckOrderThread extends Thread {
                             continue;
                         }
                         if ("filled".equalsIgnoreCase(sellMap.get("state"))) {
-                            orderList.removeOrder(pair.getBuy().getId());
-                            Writer.addFinish(pair);
                             pair.getSell().finish();
                         }
+                    }
+                    if (pair.getBuy().isFinish() && pair.getSell().isFinish()) {
+                        orderList.removeOrder(pair.getBuy().getId());
+                        Writer.addFinish(pair);
                     }
                     Thread.sleep(sleepTime * 4);
                 }
