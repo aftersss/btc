@@ -70,30 +70,35 @@ public class PlaceOrderMidThread extends Thread {
                     Map<String, Object> map = (Map<String, Object>) fcoinApi.marketDepth(level, symbol);
                     long ts = ((Number) map.get("ts")).longValue();
                     long now = MyDateFormat.getLongTime();
-                    if (Math.abs(now - ts) < 1000) {
+                    if (Math.abs(now - ts) < 2000) {
                         List<Number> asks = (List<Number>) map.get("asks");
                         List<Number> bids = (List<Number>) map.get("bids");
                         if (asks.size() > 0 && bids.size() > 0) {
                             price = (asks.get(0).doubleValue() + bids.get(0).doubleValue()) / 2;
                             num = Math.min(asks.get(1).doubleValue(), bids.get(1).doubleValue()) * discount;
                             flag = orderList.isAvail(price);
+                            if (!flag) {
+                                logger.info("fluctuate is full!!! price=" + price + " order=" + orderList.getOrders());
+                            }
                         }
+                    } else {
+                        logger.info("time is error!!! dur=" + Math.abs(now - ts));
                     }
                     Order buy = null;
                     if (flag) {
                         num = Math.min(num, this.num);
-                        price = price * (1 - profit * this.buy);
-                        BigDecimal b1 = new BigDecimal(price);
-                        price = b1.setScale(decimal.getPrice_decimal(), BigDecimal.ROUND_DOWN).doubleValue();
-                        num = AccountCache.getNum(currency, num, price);
+                        double newPrice = price * (1 - profit * this.buy);
+                        BigDecimal b1 = new BigDecimal(newPrice);
+                        newPrice = b1.setScale(decimal.getPrice_decimal(), BigDecimal.ROUND_DOWN).doubleValue();
+                        num = AccountCache.getNum(currency, num, newPrice);
                         BigDecimal b = new BigDecimal(num);
                         num = b.setScale(decimal.getAmount_decimal(), BigDecimal.ROUND_DOWN).doubleValue();
                         if (num >= minNum && num > 0) {
-                            String id = (String) fcoinApi.orders(symbol, "buy", "limit", price + "", num + "");
+                            String id = (String) fcoinApi.orders(symbol, "buy", "limit", newPrice + "", num + "");
                             if (StringUtils.isNotBlank(id)) {
-                                buy = new Order(id, symbol, price, num);
+                                buy = new Order(id, symbol, newPrice, num);
                                 orderList.addBuyOrder(buy, "mid");
-                                AccountCache.deleteAvailable(currency, num, price);
+                                AccountCache.deleteAvailable(currency, num, newPrice);
                                 logger.info(buy.toString());
                             } else {
                                 logger.error("buy order is fail!!!");
@@ -136,6 +141,8 @@ public class PlaceOrderMidThread extends Thread {
                             }
                         }
                     }
+                } else {
+                    logger.info("order size=" + orderList.getTotal() + " nowsize=" + orderList.getOrders().size());
                 }
             } catch (Throwable t) {
                 logger.error("place order error!!!", t);

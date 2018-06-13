@@ -68,13 +68,18 @@ public class PlaceOrderBuyThread extends Thread {
                     Map<String, Object> map = (Map<String, Object>) fcoinApi.marketDepth(level, symbol);
                     long ts = ((Number) map.get("ts")).longValue();
                     long now = MyDateFormat.getLongTime();
-                    if (Math.abs(now - ts) < 1000) {
+                    if (Math.abs(now - ts) < 2000) {
                         List<Number> asks = (List<Number>) map.get("asks");
                         if (asks.size() > 0) {
                             price = asks.get(0).doubleValue();
                             num += asks.get(1).doubleValue() * discount;
                             flag = orderList.isAvail(price);
+                            if (!flag) {
+                                logger.info("fluctuate is full!!! price=" + price + " order=" + orderList.getOrders());
+                            }
                         }
+                    } else {
+                        logger.info("time is error!!! dur=" + Math.abs(now - ts));
                     }
                     Order buy = null;
                     if (flag) {
@@ -130,6 +135,8 @@ public class PlaceOrderBuyThread extends Thread {
                             }
                         }
                     }
+                } else {
+                    logger.info("order size=" + orderList.getTotal() + " nowsize=" + orderList.getOrders().size());
                 }
             } catch (Throwable t) {
                 logger.error("place order error!!!", t);

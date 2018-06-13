@@ -55,10 +55,10 @@ public class CheckOrderThread extends Thread {
                     }
                     if (pair.getBuy().isFinish() && pair.getSell().isFinish()) {
                         String id;
-                        if ("buy".equalsIgnoreCase(pair.getType())) {
-                            id = pair.getBuy().getId();
-                        } else {
+                        if ("sell".equalsIgnoreCase(pair.getType())) {
                             id = pair.getSell().getId();
+                        } else {
+                            id = pair.getBuy().getId();
                         }
                         orderList.removeOrder(id);
                         Writer.addFinish(pair);
