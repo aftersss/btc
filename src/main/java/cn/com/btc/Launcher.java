@@ -17,6 +17,7 @@ public class Launcher {
     private static final Writer writer = new Writer();
     private static final Map<String, PlaceOrderBuyThread> buyPlaceOrderMap = new HashMap<>();
     private static final Map<String, PlaceOrderSellThread> sellPlaceOrderMap = new HashMap<>();
+    private static final Map<String, PlaceOrderMidThread> midPlaceOrderMap = new HashMap<>();
     private static final Map<String, CheckOrderThread> checkOrderMap = new HashMap<>();
 
     public static void main(String[] args) {
@@ -64,6 +65,20 @@ public class Launcher {
                     sellPlaceOrderMap.put(symbol, placeOrderSellThread);
                     placeOrderSellThread.start();
                     CheckOrderThread sellCheckOrderThread = new CheckOrderThread(symbol, sellOrderList);
+                    checkOrderMap.put(symbol, sellCheckOrderThread);
+                    sellCheckOrderThread.start();
+                }
+
+                if ("mid".equalsIgnoreCase(type)) {
+                    OrderList midOrderList = new OrderList(symbol, size);
+                    Map<String, Pair> sellMap = mapMap.get(symbolReal + "mid");
+                    if (sellMap != null) {
+                        midOrderList.setOrders(sellMap);
+                    }
+                    PlaceOrderMidThread placeOrderMidThread = new PlaceOrderMidThread(symbol, midOrderList, decimalMap.get(symbolReal));
+                    midPlaceOrderMap.put(symbol, placeOrderMidThread);
+                    placeOrderMidThread.start();
+                    CheckOrderThread sellCheckOrderThread = new CheckOrderThread(symbol, midOrderList);
                     checkOrderMap.put(symbol, sellCheckOrderThread);
                     sellCheckOrderThread.start();
                 }

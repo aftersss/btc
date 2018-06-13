@@ -25,6 +25,7 @@ public class PlaceOrderMidThread extends Thread {
     private final double discount;
     private final double minNum;
     private final Decimal decimal;
+    private final double buy;
     private FcoinApi fcoinApi = FcoinApiHandler.getInstance();
 
     public PlaceOrderMidThread(String symbol, OrderList orderList, Decimal decimal) {
@@ -39,6 +40,7 @@ public class PlaceOrderMidThread extends Thread {
         this.num = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".num", "1"));
         this.profit = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".profit", "0.001"));
         this.discount = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".discount", "0.5"));
+        this.buy = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".buy", "0.5"));
         this.sleepTime = Long.valueOf(ConfigHandler.getConf("btc.sleep", "1000"));
         this.minNum = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".minnum", "0"));
         setName(this.symbol + "-mid-place-order-thread");
@@ -50,6 +52,7 @@ public class PlaceOrderMidThread extends Thread {
             logger.error("get decimal is error!!! " + decimal);
             return;
         }
+        logger.info("start " + getName());
         while (!ShutdownHook.isShutDown()) {
             try {
                 if (!orderList.isSaturated()) {
@@ -79,27 +82,32 @@ public class PlaceOrderMidThread extends Thread {
                     Order buy = null;
                     if (flag) {
                         num = Math.min(num, this.num);
-                        price = price * (1 - profit);
+                        price = price * (1 - profit * this.buy);
+                        BigDecimal b1 = new BigDecimal(price);
+                        price = b1.setScale(decimal.getPrice_decimal(), BigDecimal.ROUND_DOWN).doubleValue();
                         num = AccountCache.getNum(currency, num, price);
                         BigDecimal b = new BigDecimal(num);
                         num = b.setScale(decimal.getAmount_decimal(), BigDecimal.ROUND_DOWN).doubleValue();
-                        if (num > minNum && num > 0) {
+                        if (num >= minNum && num > 0) {
                             String id = (String) fcoinApi.orders(symbol, "buy", "limit", price + "", num + "");
                             if (StringUtils.isNotBlank(id)) {
                                 buy = new Order(id, symbol, price, num);
-                                orderList.addBuyOrder(buy);
+                                orderList.addBuyOrder(buy, "mid");
                                 AccountCache.deleteAvailable(currency, num, price);
+                                logger.info(buy.toString());
                             } else {
+                                logger.error("buy order is fail!!!");
                                 flag = false;
                             }
                         } else {
+                            logger.error("num is error!!! " + num);
                             flag = false;
                         }
                     }
                     if (flag) {
                         int count = 0;
                         boolean f = true;
-                        double newPrice = price * (1 + profit);
+                        double newPrice = price * (1 + profit * (1 - this.buy));
                         BigDecimal b = new BigDecimal(newPrice);
                         newPrice = b.setScale(decimal.getPrice_decimal(), BigDecimal.ROUND_UP).doubleValue();
                         while (f) {
@@ -110,6 +118,7 @@ public class PlaceOrderMidThread extends Thread {
                                     if (StringUtils.isNotBlank(id1)) {
                                         f = false;
                                         Order sell = new Order(id1, symbol, newPrice, num);
+                                        logger.info(sell.toString());
                                         orderList.addSellOrder(buy.getId(), sell);
                                         break;
                                     }
@@ -137,5 +146,6 @@ public class PlaceOrderMidThread extends Thread {
                 }
             }
         }
+        logger.info("exit " + getName());
     }
 }

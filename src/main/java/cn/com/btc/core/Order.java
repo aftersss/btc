@@ -54,4 +54,16 @@ public class Order {
     public long getTime() {
         return time;
     }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id='" + id + '\'' +
+                ", symbol='" + symbol + '\'' +
+                ", price=" + price +
+                ", num=" + num +
+                ", time=" + time +
+                ", isFinsih=" + isFinsih +
+                '}';
+    }
 }

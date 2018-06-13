@@ -111,11 +111,11 @@ public class Writer extends Thread {
                 String type = ll[1];
                 Order buy = new Order(ll[4], symbol, Double.parseDouble(ll[5]), Double.parseDouble(ll[3]));
                 Order sell = new Order(ll[6], symbol, Double.parseDouble(ll[7]), Double.parseDouble(ll[3]));
-                Map<String, Pair> map = mapMap.computeIfAbsent(symbol, k -> new HashMap<>());
-                if ("buy".equalsIgnoreCase(type)) {
-                    map.put(buy.getId() + type, new Pair(type, buy, sell));
+                Map<String, Pair> map = mapMap.computeIfAbsent(symbol + type, k -> new HashMap<>());
+                if ("buy".equalsIgnoreCase(type) || "mid".equalsIgnoreCase(type)) {
+                    map.put(buy.getId(), new Pair(type, buy, sell));
                 } else {
-                    map.put(sell.getId() + type, new Pair(type, buy, sell));
+                    map.put(sell.getId(), new Pair(type, buy, sell));
                 }
             }
             br.close();
@@ -129,11 +129,11 @@ public class Writer extends Thread {
                 String type = ll[1];
                 Order buy = new Order(ll[4], symbol, Double.parseDouble(ll[5]), Double.parseDouble(ll[3]));
                 Order sell = new Order(ll[6], symbol, Double.parseDouble(ll[7]), Double.parseDouble(ll[3]));
-                Map<String, Pair> map = mapMap.computeIfAbsent(symbol, k -> new HashMap<>());
-                if ("buy".equalsIgnoreCase(type)) {
-                    map.put(buy.getId() + type, new Pair(type, buy, sell));
+                Map<String, Pair> map = mapMap.computeIfAbsent(symbol + type, k -> new HashMap<>());
+                if ("buy".equalsIgnoreCase(type) || "mid".equalsIgnoreCase(type)) {
+                    map.put(buy.getId(), new Pair(type, buy, sell));
                 } else {
-                    map.put(sell.getId() + type, new Pair(type, buy, sell));
+                    map.put(sell.getId(), new Pair(type, buy, sell));
                 }
             }
             br.close();
@@ -146,16 +146,16 @@ public class Writer extends Thread {
                 String symbol = ll[2];
                 String type = ll[1];
                 String id;
-                if ("buy".equalsIgnoreCase(type)) {
+                if ("buy".equalsIgnoreCase(type) || "mid".equalsIgnoreCase(type)) {
                     id = ll[4];
                 } else {
                     id = ll[6];
                 }
-                Map<String, Pair> map = mapMap.get(symbol);
+                Map<String, Pair> map = mapMap.get(symbol + type);
                 if (map == null) {
                     continue;
                 }
-                map.remove(id + type);
+                map.remove(id);
             }
             br.close();
         }
@@ -167,16 +167,16 @@ public class Writer extends Thread {
                 String symbol = ll[2];
                 String type = ll[1];
                 String id;
-                if ("buy".equalsIgnoreCase(type)) {
+                if ("buy".equalsIgnoreCase(type) || "mid".equalsIgnoreCase(type)) {
                     id = ll[4];
                 } else {
                     id = ll[6];
                 }
-                Map<String, Pair> map = mapMap.get(symbol);
+                Map<String, Pair> map = mapMap.get(symbol + type);
                 if (map == null) {
                     continue;
                 }
-                map.remove(id + type);
+                map.remove(id);
             }
             br.close();
         }

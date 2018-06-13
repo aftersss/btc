@@ -50,6 +50,7 @@ public class PlaceOrderSellThread extends Thread {
             logger.error("get decimal is error!!! " + decimal);
             return;
         }
+        logger.info("start " + getName());
         while (!ShutdownHook.isShutDown()) {
             try {
                 if (!orderList.isSaturated()) {
@@ -87,10 +88,13 @@ public class PlaceOrderSellThread extends Thread {
                                 sell = new Order(id, symbol, price, num);
                                 orderList.addSellOrder(sell);
                                 AccountCache.deleteAvailable(coin, num, price);
+                                logger.info(sell.toString());
                             } else {
+                                logger.error("sell order is fail!!!");
                                 flag = false;
                             }
                         } else {
+                            logger.error("num is error!!! " + num);
                             flag = false;
                         }
                     }
@@ -108,6 +112,7 @@ public class PlaceOrderSellThread extends Thread {
                                     if (StringUtils.isNotBlank(id1)) {
                                         f = false;
                                         Order buy = new Order(id1, symbol, newPrice, num);
+                                        logger.info(buy.toString());
                                         orderList.addBuyOrder(sell.getId(), buy);
                                         break;
                                     }
@@ -135,5 +140,6 @@ public class PlaceOrderSellThread extends Thread {
                 }
             }
         }
+        logger.info("exit " + getName());
     }
 }

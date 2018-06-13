@@ -30,6 +30,10 @@ public class OrderList {
         orders.put(buy.getId(), new Pair("buy", buy, null));
     }
 
+    public void addBuyOrder(Order buy, String type) {
+        orders.put(buy.getId(), new Pair(type, buy, null));
+    }
+
     public void addSellOrder(String buyid, Order sell) {
         Pair pair = orders.get(buyid);
         pair.setSell(sell);

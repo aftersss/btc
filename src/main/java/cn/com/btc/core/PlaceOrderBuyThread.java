@@ -50,6 +50,7 @@ public class PlaceOrderBuyThread extends Thread {
             logger.error("get decimal is error!!! " + decimal);
             return;
         }
+        logger.info("start " + getName());
         while (!ShutdownHook.isShutDown()) {
             try {
                 if (!orderList.isSaturated()) {
@@ -81,16 +82,19 @@ public class PlaceOrderBuyThread extends Thread {
                         num = AccountCache.getNum(currency, num, price);
                         BigDecimal b = new BigDecimal(num);
                         num = b.setScale(decimal.getAmount_decimal(), BigDecimal.ROUND_DOWN).doubleValue();
-                        if (num > minNum && num > 0) {
+                        if (num >= minNum && num > 0) {
                             String id = (String) fcoinApi.orders(symbol, "buy", "limit", price + "", num + "");
                             if (StringUtils.isNotBlank(id)) {
                                 buy = new Order(id, symbol, price, num);
                                 orderList.addBuyOrder(buy);
                                 AccountCache.deleteAvailable(currency, num, price);
+                                logger.info(buy.toString());
                             } else {
+                                logger.error("buy order is fail!!!");
                                 flag = false;
                             }
                         } else {
+                            logger.error("num is error!!! " + num);
                             flag = false;
                         }
                     }
@@ -109,6 +113,7 @@ public class PlaceOrderBuyThread extends Thread {
                                         f = false;
                                         Order sell = new Order(id1, symbol, newPrice, num);
                                         orderList.addSellOrder(buy.getId(), sell);
+                                        logger.info(sell.toString());
                                         break;
                                     }
                                 }
@@ -135,5 +140,6 @@ public class PlaceOrderBuyThread extends Thread {
                 }
             }
         }
+        logger.info("exit " + getName());
     }
 }
