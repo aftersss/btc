@@ -11,8 +11,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
-public class PlaceOrderThread extends Thread {
-    private static final Logger logger = LoggerFactory.getLogger(PlaceOrderThread.class);
+public class PlaceOrderBuyThread extends Thread {
+    private static final Logger logger = LoggerFactory.getLogger(PlaceOrderBuyThread.class);
     private final String symbol;
     private final OrderList orderList;
     private final String level;
@@ -27,7 +27,7 @@ public class PlaceOrderThread extends Thread {
     private final Decimal decimal;
     private FcoinApi fcoinApi = FcoinApiHandler.getInstance();
 
-    public PlaceOrderThread(String symbol, OrderList orderList, Decimal decimal) {
+    public PlaceOrderBuyThread(String symbol, OrderList orderList, Decimal decimal) {
         this.symbol = symbol.replace("-", "");
         this.decimal = decimal;
         String[] s = symbol.split("-");
