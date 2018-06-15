@@ -68,6 +68,7 @@ public class PlaceOrderSellThread extends Thread {
                     boolean flag = false;
                     double price = 0d;
                     double num = 0d;
+                    double newPrice = 0d;
                     Map<String, Object> map = (Map<String, Object>) fcoinApi.marketDepth(level, symbol);
                     long ts = ((Number) map.get("ts")).longValue();
                     long now = MyDateFormat.getLongTime();
@@ -76,7 +77,10 @@ public class PlaceOrderSellThread extends Thread {
                         if (bids.size() > 0) {
                             price = bids.get(0).doubleValue();
                             num += bids.get(1).doubleValue() * discount;
-                            flag = (sellmin <= 0 || price > sellmin) && orderList.isAvail(price);
+                            newPrice = price * profit;
+                            BigDecimal b = new BigDecimal(newPrice);
+                            newPrice = b.setScale(decimal.getPrice_decimal(), BigDecimal.ROUND_UP).doubleValue();
+                            flag = (sellmin <= 0 || price > sellmin) && orderList.isAvail(newPrice);
                             if (!flag) {
                                 logger.info("fluctuate is full!!! price=" + price);
                             }
@@ -109,9 +113,6 @@ public class PlaceOrderSellThread extends Thread {
                     if (flag) {
                         int count = 0;
                         boolean f = true;
-                        double newPrice = price * profit;
-                        BigDecimal b = new BigDecimal(newPrice);
-                        newPrice = b.setScale(decimal.getPrice_decimal(), BigDecimal.ROUND_UP).doubleValue();
                         while (f) {
                             try {
                                 double nn = AccountCache.getNum(currency, num, newPrice);
