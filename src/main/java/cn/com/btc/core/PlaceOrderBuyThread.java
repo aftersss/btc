@@ -25,6 +25,7 @@ public class PlaceOrderBuyThread extends Thread {
     private final double discount;
     private final double minNum;
     private final Decimal decimal;
+    private final double buymax;
     private FcoinApi fcoinApi = FcoinApiHandler.getInstance();
 
     public PlaceOrderBuyThread(String symbol, OrderList orderList, Decimal decimal) {
@@ -37,6 +38,7 @@ public class PlaceOrderBuyThread extends Thread {
         this.isFt = "ft".equalsIgnoreCase(currency) || "ft".equalsIgnoreCase(coin);
         this.level = ConfigHandler.getConf("btc." + symbol + ".level", "L20");
         this.num = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".num", "1"));
+        this.buymax = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".buymax", "0"));
         this.profit = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".profit", "0.001")) + 1;
         this.discount = Double.valueOf(ConfigHandler.getConf("btc." + symbol + ".discount", "0.5"));
         this.sleepTime = Long.valueOf(ConfigHandler.getConf("btc.sleep", "1000"));
@@ -73,7 +75,7 @@ public class PlaceOrderBuyThread extends Thread {
                         if (asks.size() > 0) {
                             price = asks.get(0).doubleValue();
                             num += asks.get(1).doubleValue() * discount;
-                            flag = orderList.isAvail(price);
+                            flag = (buymax <= 0 || price < buymax) && orderList.isAvail(price);
                             if (!flag) {
                                 logger.info("fluctuate is full!!! price=" + price);
                             }
