@@ -124,7 +124,11 @@ public class PlaceOrderSellOldThread extends Thread {
                                         logger.info(buy.toString());
                                         orderList.addBuyOrder(sell.getId(), buy);
                                         break;
+                                    } else {
+                                        logger.info(" buy order fail!!!");
                                     }
+                                } else {
+                                    logger.info(" con't full num!!! nn" + nn + " num=" + num);
                                 }
                                 if (ShutdownHook.isShutDown()) {
                                     count++;
