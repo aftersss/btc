@@ -60,6 +60,7 @@ public class PlaceOrderSellThread extends Thread {
                         Calendar calendar = Calendar.getInstance();
                         int min = calendar.get(Calendar.MINUTE);
                         if (min == 59 || (min >= 0 && min <= 3)) {
+                            logger.info("in no order time!!!");
                             Thread.sleep(4 * sleepTime);
                             continue;
                         }
