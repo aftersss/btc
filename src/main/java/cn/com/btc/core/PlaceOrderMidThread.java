@@ -82,12 +82,17 @@ public class PlaceOrderMidThread extends Thread {
                                 logger.info("fluctuate is full!!! price=" + price);
                             }
                         }
+
                     } else {
                         logger.info("time is error!!! dur=" + Math.abs(now - ts));
                     }
                     Order buy = null;
                     if (flag) {
-                        num = Math.min(num, this.num);
+                        if (profit <= 0) {
+                            num = this.num;
+                        } else {
+                            num = Math.min(num, this.num);
+                        }
                         double newPrice = price * (1 - profit * this.buy);
                         BigDecimal b1 = new BigDecimal(newPrice);
                         newPrice = b1.setScale(decimal.getPrice_decimal(), BigDecimal.ROUND_DOWN).doubleValue();

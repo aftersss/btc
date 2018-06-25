@@ -1,18 +1,18 @@
 package cn.com.btc;
 
 import cn.com.btc.core.FcoinApiHandler;
-import cn.com.btc.core.Pair;
-import cn.com.btc.core.Writer;
+import cn.com.btc.ft.FcoinApi;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class LauncherTest {
+    private static final Logger logger = LoggerFactory.getLogger(LauncherTest.class);
+
     public static void main(String[] args) throws IOException {
-        ConcurrentLinkedQueue<String> orderQueue = new ConcurrentLinkedQueue<>();
-        orderQueue.add("1");
-        orderQueue.add("2");
-        System.out.println(orderQueue.poll());
-        System.out.println(orderQueue.poll());
+        FcoinApi fcoinApi = FcoinApiHandler.getInstance();
+        Object obj = fcoinApi.queryOrderList("fteth", "submitted", null, 1000 + "", 2000 + "");
+        logger.info(obj.toString());
     }
 }
