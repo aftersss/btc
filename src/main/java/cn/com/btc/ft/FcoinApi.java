@@ -85,12 +85,15 @@ public class FcoinApi {
             return null;
         }
         String json = httpExecute(url, UrlConfig.ACCOUNTS_BALANCE.getMethod(), null, key, sign, timeStamp);
+        if(json == null){
+            return null;
+        }
         Map map = gson.fromJson(json, Map.class);
         int status = ((Number) map.get("status")).intValue();
         if (status == 0) {
             return map.get("data");
         } else {
-            logger.error("accountsBalance error!!!" + json);
+            logger.error("get accountsBalance error!!!, result is: " + json);
             return null;
         }
     }

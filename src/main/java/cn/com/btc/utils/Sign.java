@@ -25,7 +25,7 @@ public class Sign {
             String paramStr = parseParams(params);
             StringBuilder builder = new StringBuilder();
             //设置大写的method，get 或者 post
-            builder.append(method.toUpperCase());
+            builder.append(method.toUpperCase()).append(" ");
             //设置url
             builder.append(url);
             //设置get请求参数

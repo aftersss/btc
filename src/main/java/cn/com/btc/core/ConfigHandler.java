@@ -11,7 +11,7 @@ import java.util.Properties;
 
 public class ConfigHandler {
     private static final Logger logger = LoggerFactory.getLogger(ConfigHandler.class);
-    private static Properties properties;
+    private static volatile Properties properties;
 
     static {
         update();
